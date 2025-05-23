@@ -1,0 +1,166 @@
+/* @import "tailwindcss"; */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 160 40% 98%; /* Mint cream background */
+    --foreground: 232 36% 18%; /* Deep navy text */
+
+    --card: 0 0% 100%;
+    --card-foreground: 232 36% 18%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 232 36% 18%;
+
+    --primary: 0 79% 71%; /* Soft coral */
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 155 45% 95%; /* Light mint */
+    --secondary-foreground: 232 36% 18%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 40 100% 50%; /* Warm mustard */
+    --accent-foreground: 232 36% 18%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 0 79% 71%;
+
+    --radius: 1.2rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    /* Direct color values for custom colors */
+    --color-coral: #FF6B6B;
+    --color-coral-light: #FF8F8F;
+    --color-coral-dark: #E55858;
+    --color-mint: #F1FAF6;
+    --color-navy: #1A1E3F;
+    --color-mustard: #FFB400;
+  }
+
+  .dark {
+    --background: 232 38% 15%;
+    --foreground: 155 40% 96%;
+    
+    --card: 232 36% 18%;
+    --card-foreground: 155 40% 96%;
+    
+    --popover: 232 36% 18%;
+    --popover-foreground: 155 40% 96%;
+    
+    --primary: 0 79% 71%;
+    --primary-foreground: 0 0% 98%;
+    
+    --secondary: 232 24% 24%;
+    --secondary-foreground: 155 40% 96%;
+    
+    --muted: 232 24% 24%;
+    --muted-foreground: 215 20.2% 65.1%;
+    
+    --accent: 40 100% 50%;
+    --accent-foreground: 232 36% 18%;
+    
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    
+    --border: 232 24% 24%;
+    --input: 232 24% 24%;
+    --ring: 0 79% 71%;
+    
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  /* * {
+    @apply border-border;
+  } */
+
+  body {
+  @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-coral/50 rounded-full transition-colors;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-coral;
+  }
+}
+
+@layer utilities {
+  .shimmer {
+    @apply bg-shimmer-gradient bg-[length:1000px_100%] animate-shimmer;
+  }
+
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-card hover:-translate-y-1;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .glass-card {
+    @apply backdrop-blur-md bg-white/10 dark:bg-navy/20 border border-white/20 dark:border-white/10;
+  }
+  
+  .hero-gradient {
+    @apply bg-gradient-to-br from-mint to-mint/30 dark:from-navy-light/20 dark:to-navy/30;
+  }
+  
+  /* Explicit color utility classes as a fallback */
+  .bg-coral-fallback {
+    background-color: #FF6B6B;
+  }
+  
+  .text-coral-fallback {
+    color: #FF6B6B;
+  }
+}
+
+
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
