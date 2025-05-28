@@ -63,6 +63,7 @@ export const useAuthStore = create(
         }
       },
 
+      // for logout -> we need to be stating user as null.
       logout: async () => {
         set({ isLoading: true, error: null });
         try {

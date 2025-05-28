@@ -7,6 +7,16 @@ import './App.css'
 import SharedSidebarLayout from './layouts/SharedSidebarLayout';
 // import './index.css'
 
+// Admin Pages
+import AdminLayout from './layouts/AdminLayout';
+import Dashboard from './pages/admin/AdminDashboard';             // have to make it customizable
+import RestaurantManagement from './pages/admin/RestaurantManagement'
+import MenuManagement from './pages/admin/MenuManagement';
+
+
+
+
+
 
 
 function App() {
@@ -22,17 +32,26 @@ function App() {
   <Routes>
     <Route>
       <Route path='/' element={<SharedSidebarLayout/>}/>
-      {/* <Route path='/' element={<div className=''>Heloo </div>}/> */}
+      {/* <Route path='/' element={<div className=''>Helloo </div>}/> */}
     <Route path='/api/v1/auth/register' element={<RegisterPage/>}/>
     <Route path='/api/v1/auth/login' element={<LoginPage/>}/>
+    </Route>
+    {/* Admin routes */}
+    <Route path='/admin' element={<AdminLayout/>}>
+      <Route index element={<Dashboard/>}/>
+      {/* <Route path='orders' element={<OrdersPage/>}/> */}
+      {/* <Route path='/restaurant-management' element={<RestaurantManagement/>}/> */}
+      <Route path='/admin/menu' element={<MenuManagement/>}/>
+      {/* <Route path='menu' element={<MenuPage/>}/> */}
+      {/* <Route path='settings' element={<SettingsPage/>}/> */}
+      {/* Add more admin routes as needed */}
 
     </Route>
   </Routes>
   </BrowserRouter>
 
-
     </>
-  )
+  );
 }
 
 export default App

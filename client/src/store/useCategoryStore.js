@@ -19,11 +19,11 @@ export const useCategoryStore = create(
       isLoading: false,
       error: null,
 
-      createCategory: async (title, imageUr) => {
+      createCategory: async (title, imageUrl) => {
         set({ isLoading: true, error: null });
         try {
           const response = await axiosInstance.post(`${API_ROUTES.CATEGORY}/createFood`, {
-          title, imageUr
+          title, imageUrl
           });
           set({ isLoading: false });
           return response.data.category;
@@ -63,6 +63,16 @@ export const useCategoryStore = create(
           const response = await axiosInstance.put(`${API_ROUTES.CATEGORY}/updateCategory/${id}`, {title, imageUrl});
 
           set({ isLoading: false, food: response.data.updateCategory });
+
+
+          // another way of initializing a category
+          // set(state => ({
+          //   isLoading: false,
+          //   categories: state.categories.map(cat => 
+          //     cat._id === id ? response.data.updatedCategory : cat
+          //   )
+
+
         } catch (error) {
           set({
             isLoading: false,
@@ -70,6 +80,7 @@ export const useCategoryStore = create(
               ? error?.response?.data?.error || 'Category update failed'
               : 'Category update failed',
           });
+          return false;
         }
       },
 

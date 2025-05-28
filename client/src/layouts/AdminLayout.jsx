@@ -25,7 +25,7 @@ const AdminLayout = () => {
       {/* Sidebar */}
       <aside className="w-64 bg-white shadow-md hidden md:block">
         <div className="p-6">
-          <h2 className="text-2xl font-bold text-restaurant-softRed">FoodieAdmin</h2>
+          <h2 className="text-2xl font-bold text-restaurant-softRed">Foodie Admin</h2>
         </div>
         <nav className="mt-6">
           {navItems.map((item) => (

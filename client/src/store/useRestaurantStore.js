@@ -68,12 +68,21 @@ export const useRestaurantStore = create(
         }
       },
 
+      // getAllRestaurants is meant to fetch data from the server and read it.
+      // set({ isLoading: true, error: null });    ...    set({ isLoading: false, restaurants: response.data.restaurants });
+      // That means you're not just reading — you're telling Zustand to update the isLoading, restaurants, and error values in global state.
+      // so for Reading state -> get() -> why? to access current state.
+      // so for Updating state -> set() -> why? To change isLoading, restaurants, etc.
+      // So in summary: ✅ yes, you're "getting data" from the server — but you're also updating Zustand state, which is why you must use set().
+
       getAllRestaurants: async () => {
-        get({ isLoading: true, error: null });
+        // get({ isLoading: true, error: null });
+        set({ isLoading: true, error: null });         // ✅ setting loading state
         try {
           const response = await axiosInstance.get(`${API_ROUTES.RESTAURANT}/getAllRestaurants`);
           console.log('GetAllRestaurants', response);
-          get({ isLoading: false, restaurants: response.data.restaurants });
+          // get({ isLoading: false, restaurants: response.data.restaurants });
+          set({ isLoading: false, restaurants: response.data.restaurants });         // ✅ updating state   --> coz, we have to update the state everytime, when new restaurant comes in.
           return true;
         } catch (error) {
           get({

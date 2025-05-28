@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable no-unused-vars */
 import React, { useState } from "react";
 import { Button } from "../ui/button";
@@ -16,11 +17,20 @@ import {
   AlertDialogTitle,
 } from "../ui/alert-dialog";
 import { toast } from "../ui/sonner";
+import FallbackImage from "../../../public/fallback-image.jpg"
+import PropTypes from 'prop-types';
+
 
 
 
 
 const FoodItemCard = ({ food, onEdit, onDelete }) => {
+
+
+  // Add this check at the start of your component
+  if (!food) {
+    return null; // or return a loading skeleton/placeholder
+  }
 
   const { deleteFood } = useFoodStore();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -69,8 +79,8 @@ const FoodItemCard = ({ food, onEdit, onDelete }) => {
       <Card key={food.id} className={"overflow-hidden"}>
         <div className="relative h-40">
           <img
-            src={food.imageUrl}
-            alt={food.title}
+            src={food?.imageUrl || FallbackImage} 
+            alt={food?.title || "Food Item"}
             className="w-full h-full object-cover"
           />
           {/* Discount badge */}
@@ -173,5 +183,19 @@ const FoodItemCard = ({ food, onEdit, onDelete }) => {
     </>
   )
 }
+
+
+
+FoodItemCard.propTypes = {
+  food: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    title: PropTypes.string,
+    imageUrl: PropTypes.string,
+    code: PropTypes.string,
+    delivery: PropTypes.bool
+  }),
+  onEdit: PropTypes.func,
+  onDelete: PropTypes.func
+};
 
 export default FoodItemCard;

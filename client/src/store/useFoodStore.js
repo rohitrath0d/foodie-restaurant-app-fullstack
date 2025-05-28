@@ -43,7 +43,8 @@ export const useFoodStore = create(
         try {
           const response = await axiosInstance.get(`${API_ROUTES.FOOD}/getAllFood`);
           console.log('FoodResponse', response);
-          set({ isLoading: false, foods: response.data.foods });
+          // set({ isLoading: false, foods: response.data.foods }); 
+          set({ isLoading: false, food: response.data.foods }); // Changed from foods to food
           return true;
         } catch (error) {
           set({
@@ -125,8 +126,22 @@ export const useFoodStore = create(
         set({ isLoading: true, error: null });
         try {
           const response = await axiosInstance.put(`${API_ROUTES.FOOD}/updateFood/${foodID}`, updatedFood);
-          set({ user: null, isLoading: false });
-          return response.data.updateFood;
+          
+          // set({ user: null, isLoading: false });
+          // IMPORTANT POINT TO BE NOTED:
+          //  user: null is needed only when logging out or resetting state — not inside the actual deleteFood() call.
+          // If you're calling:  set({ user: null, isLoading: false });
+          // This should not be inside your deleteFood/updateFood function unless you're trying to:   log the user out, or  || clear user info after deletion for some reason (which is unusual).
+
+          // router.delete("/deleteFood/:id", authMiddleware, deleteFoodController);      -->> authMiddleware verifies the user token (likely via JWT or session).
+          // This means the user must be authenticated, and their identity is used in deleteFoodController (e.g., maybe checking if they own the food item).
+          // So on the frontend, when calling deleteFood(id):  Nowhere here should you be setting user: null — that would essentially remove the user from your app state, like logging them out.
+
+          // ✅ When to Use set({ user: null })
+          // Only in these cases:   User clicks Log Out    |   Token is invalid and you force logout    |     Your app resets state, e.g., on session timeout.
+
+          set({  isLoading: false });
+          return response.data.updateFood;         // Ensure backend returns this
         } catch (error) {
           set({
             isLoading: false,
@@ -151,6 +166,7 @@ export const useFoodStore = create(
               ? error?.response?.data?.error || 'Food item cannot be deleted.'
               : 'Food item cannot be deleted.',
           });
+          return true; // Add return value on success
         }
       },
 

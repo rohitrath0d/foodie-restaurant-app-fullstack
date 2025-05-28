@@ -46,11 +46,12 @@ const FoodItemParentComponent = () => {
 
 
   // // Handle form submission (both create and update)
-  // const handleFormSubmit = async () => {
-  //   await refreshRestaurants();
-  //   setIsFormOpen(false);
-  //   setEditingRestaurant(null);
-  // };
+  const handleFormSubmit = async () => {
+    // await refreshRestaurants();
+    await refreshFoods();
+    setIsFormOpen(false);
+    getAllFood(null);
+  };
 
   // Handle delete
   const handleDelete = async (id) => {
@@ -78,11 +79,12 @@ const FoodItemParentComponent = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {food.map((restaurant) => (
+        {/* {food.map((restaurant) => ( */}
+        {food.map((food) => (
           // <RestaurantCard
           <FoodItemCard
             key={food.id}
-            food={food}
+            food={food}             // Pass the current item
             onEdit={() => handleEditInit(food)}                             // edit restaurant through card
             onDelete={() => handleDelete(food.id)}              // delete restaurant through card
 
@@ -91,13 +93,16 @@ const FoodItemParentComponent = () => {
       </div>
 
       {/* Restaurant Form Modal/Dialog */}
-      {/* {isFormOpen && (
-        <RestaurantForm
-          restaurant={editingRestaurant}
+      {/* {isFormOpen && (                                  // --> This creates a duplicate dialog, hence commented out.
+        // <RestaurantForm
+        <FoodItemForm
+          // restaurant={editingRestaurant}
+          food={editingFood}
           onSuccess={handleFormSubmit}
           onCancel={() => {
             setIsFormOpen(false);
-            setEditingRestaurant(null);
+            // setEditingRestaurant(null);
+            setEditingFood(null);
           }}
         />
       )} */}
@@ -112,7 +117,15 @@ const FoodItemParentComponent = () => {
               refreshFoods();         // re-fetch from backend
               setIsFormOpen(false);
             }}
-            onCancel={() => setIsFormOpen(false)}
+            onCancel={() => {
+              setIsFormOpen(false)
+              setEditingFood(null);
+                
+            }}
+
+            categories={[]}  // Pass actual categories
+          tags={[]}        // Pass actual tags
+          restaurantId={""} // Pass actual restaurantId
           />
         </DialogContent>
       </Dialog>
