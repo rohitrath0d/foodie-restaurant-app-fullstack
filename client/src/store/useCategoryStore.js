@@ -19,10 +19,11 @@ export const useCategoryStore = create(
       isLoading: false,
       error: null,
 
-      createCategory: async (title, imageUrl) => {
+      createCategory: async (category) => {
+        const { title, imageUrl } = category;        //  Refactor createTag to accept a tag object   // Destructure the category object
         set({ isLoading: true, error: null });
         try {
-          const response = await axiosInstance.post(`${API_ROUTES.CATEGORY}/createFood`, {
+          const response = await axiosInstance.post(`${API_ROUTES.CATEGORY}/createCategory`, {
           title, imageUrl
           });
           set({ isLoading: false });
@@ -43,7 +44,7 @@ export const useCategoryStore = create(
         try {
           const response = await axiosInstance.get(`${API_ROUTES.CATEGORY}/getAllCategory`);
           console.log('categoryResponse', response);
-          set({ isLoading: false, categories: response.data.categories });
+          set({ isLoading: false,  category: response.data.categories });      // Changed from categories to category. Because in backend controller of getAllCategory, we used the res.send as {categories}, and hence here in frontend we are passing category (singular name for the plurals too).
           return true;
         } catch (error) {
           set({
@@ -57,7 +58,7 @@ export const useCategoryStore = create(
       },
 
       // take id here,
-      updateCategory: async (id, title, imageUrl) => {
+      updateCategory: async (id,{ title, imageUrl}) => {
         set({ isLoading: true, error: null });
         try {
           const response = await axiosInstance.put(`${API_ROUTES.CATEGORY}/updateCategory/${id}`, {title, imageUrl});
@@ -103,12 +104,12 @@ export const useCategoryStore = create(
         }
       },
     }),
-    {
-      name: 'category-storage',
-      partialize: (state) => ({
-        //  user: state.user 
-        category: state.category
-      }),
-    }
+    // {
+    //   name: 'category-storage',
+    //   partialize: (state) => ({
+    //     //  user: state.user 
+    //     category: state.category
+    //   }),
+    // }
   )
 );

@@ -1,11 +1,11 @@
-/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 import { useState } from "react";
 import { useFoodStore } from "../../store/useFoodStore";
 import FoodItemCard from "./FoodItemCard";
 import FoodItemForm from "./FoodItemForm";
 import { Button } from "../ui/button";
 import { Plus } from "lucide-react";
-import { Dialog, DialogContent } from "../ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "../ui/dialog";
 import { useEffect } from "react";
 
 
@@ -32,8 +32,8 @@ const FoodItemParentComponent = () => {
   };
 
   // Handle edit initialization
-  const handleEditInit = (food) => {
-    // setEditingRestaurant(food);
+  const handleEditInit = (food) => {                          // food is nothing but foodItem in the schema context
+    // setEditingRestaurant(food);                        // --> This is for restaurant, hence commented out.       
     setEditingFood(food);
     setIsFormOpen(true);
   };
@@ -87,7 +87,7 @@ const FoodItemParentComponent = () => {
             food={food}             // Pass the current item
             onEdit={() => handleEditInit(food)}                             // edit restaurant through card
             onDelete={() => handleDelete(food.id)}              // delete restaurant through card
-
+            // onSuccess={handleFormSubmit} // handle form submission
           />
         ))}
       </div>
@@ -108,25 +108,43 @@ const FoodItemParentComponent = () => {
       )} */}
 
       {/* Restaurant Form Modal */}
-      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+      {/* <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}> */}
+      <Dialog open={isFormOpen} onOpenChange={(open) => {
+        if (!open) {
+          setEditingFood(null);
+        }
+        setIsFormOpen(open);
+      }}>
         <DialogContent className="sm:max-w-[625px]">
+        <DialogTitle>{editingFood ? "Edit Food Item" : "Add Food Item"}</DialogTitle>
+
           {/* <RestaurantForm */}
           <FoodItemCard
             food={editingFood}
-            onSuccess={() => {
-              refreshFoods();         // re-fetch from backend
-              setIsFormOpen(false);
-            }}
+            // onSuccess={() => {
+            //   refreshFoods();         // re-fetch from backend
+            //   setIsFormOpen(false);
+            // }}
+            onSuccess={handleFormSubmit}
             onCancel={() => {
               setIsFormOpen(false)
               setEditingFood(null);
                 
             }}
 
-            categories={[]}  // Pass actual categories
-          tags={[]}        // Pass actual tags
-          restaurantId={""} // Pass actual restaurantId
+            categories={[]}  // Pass actual categories from your store
+            tags={[]}        // Pass actual tags from your store
+            restaurantId={""} // Pass actual restaurantId
           />
+
+          <FoodItemForm 
+              food = {isFormOpen ? editingFood : null} // Pass the current food item if editing, else null
+              onSuccess={handleFormSubmit} // handle form submission
+              onCancel={() => {
+                setIsFormOpen(false);
+                setEditingFood(null);
+              }}
+            />
         </DialogContent>
       </Dialog>
     </div>

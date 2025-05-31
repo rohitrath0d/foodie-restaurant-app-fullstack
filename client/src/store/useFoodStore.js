@@ -180,12 +180,12 @@ export const useFoodStore = create(
       //   }
       // },
     }),
-    {
-      name: 'food-storage',
-      partialize: (state) => ({
-        //  user: state.user 
-        food: state.food
-      }),
-    }
+    // {
+    //   name: 'food-storage',
+    //   partialize: (state) => ({
+    //     //  user: state.user 
+    //     food: state.food
+    //   }),
+    // }
   )
 );

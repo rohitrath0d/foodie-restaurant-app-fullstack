@@ -6,7 +6,8 @@ const router = express.Router();
 
 // routes:-
 // CREATE CATEGORY
-router.post('/createCategory', authMiddleware, createCategoryController);
+// router.post('/createCategory', authMiddleware, createCategoryController);
+router.post('/createCategory', createCategoryController);
 
 // GET ALL CATEGORY
 router.get("/getAllCategory", getAllCategoryCategory );

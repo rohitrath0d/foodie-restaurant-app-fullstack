@@ -6,7 +6,8 @@ export const API_ROUTES = {
   RESTAURANT : `${API_BASE_URL}/api/v1/restaurant`,
   CATEGORY : `${API_BASE_URL}/api/v1/category`,
   FOOD : `${API_BASE_URL}/api/v1/food`,
-  ORDERS : `${API_BASE_URL}/api/v1/orders`
+  ORDERS : `${API_BASE_URL}/api/v1/orders`,
+  TAGS: `${API_BASE_URL}/api/v1/tags`,
 }
 
 // export const API_ENDPOINTS = {

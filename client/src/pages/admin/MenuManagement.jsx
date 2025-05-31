@@ -8,10 +8,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/ta
 // import TagsTab from "@/components/admin/TagsTab";
 
 // import { mockFoodItems, mockCategories, mockTags } from "@/data/mockMenuData";
-import FoodItemParentComponent from "@/components/admin/FoodItemParentComponent";
-import { useFoodStore } from "@/store/useFoodStore";
-
-
+import FoodItemParentComponent from "../../components/admin/FoodItemParentComponent";
+import { useFoodStore } from "../../store/useFoodStore";
+import CategoriesTabMenu from "@/components/admin/CategoriesTabMenu";
+import TagsTabMenu from "../../components/admin/TagsTabMenu";
 
 const MenuManagement = () => {
   const [activeTab, setActiveTab] = useState("menuItems");
@@ -34,6 +34,8 @@ const MenuManagement = () => {
         <TabsContent value="menuItems" className="space-y-6">
           <FoodItemParentComponent 
             menuItems={food} 
+            categories = {[]}
+            tags = {[]}
             // categories={mockCategories} 
             // tags={mockTags} 
           />
@@ -41,10 +43,13 @@ const MenuManagement = () => {
         
         <TabsContent value="categories" className="space-y-6">
           {/* <CategoriesTab categories={mockCategories} /> */}
+          <CategoriesTabMenu />
         </TabsContent>
         
         <TabsContent value="tags" className="space-y-6">
           {/* <TagsTab tags={mockTags} /> */}
+          <TagsTabMenu />
+          
         </TabsContent>
       </Tabs>
     </div>

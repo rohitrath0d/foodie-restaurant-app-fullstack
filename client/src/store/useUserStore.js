@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
 import {API_ROUTES} from '../utils/api'
 import axios from 'axios'
@@ -114,7 +113,6 @@ export const useUserStore =  create(
           });
         }
       },
-
     })
   )
 )

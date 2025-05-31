@@ -17,7 +17,7 @@ import {
   AlertDialogTitle,
 } from "../ui/alert-dialog";
 import { toast } from "../ui/sonner";
-import FallbackImage from "../../../public/fallback-image.jpg"
+// import FallbackImage from "../../../public/fallback-image.jpg"       // -> vite doesn't allow to directly import images from the src directory
 import PropTypes from 'prop-types';
 
 
@@ -79,7 +79,7 @@ const FoodItemCard = ({ food, onEdit, onDelete }) => {
       <Card key={food.id} className={"overflow-hidden"}>
         <div className="relative h-40">
           <img
-            src={food?.imageUrl || FallbackImage} 
+            src={food?.imageUrl || "/fallback-image.jpg"} 
             alt={food?.title || "Food Item"}
             className="w-full h-full object-cover"
           />

@@ -192,12 +192,12 @@ export const useRestaurantStore = create(
         }
       },
     }),
-    {
-      name: 'restaurant-storage',
-      partialize: (state) => ({
-        // user: state.user,
-        restaurants: state.restaurants,
-      }),
-    }
+    // {
+    //   name: 'restaurant-storage',
+    //   partialize: (state) => ({
+    //     // user: state.user,
+    //     restaurants: state.restaurants,
+    //   }),
+    // }
   )
 );
