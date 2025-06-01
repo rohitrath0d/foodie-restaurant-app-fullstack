@@ -3,6 +3,14 @@ const categoryModel = require("../models/categoryModel");
 // create restaurant
 const createCategoryController = async (req, res) => {
   try {
+
+    //  const userId = req.user.id; // Extracted from token by auth middleware
+
+    // Optional: check if user is admin — either here or in separate middleware
+    // const user = await userModel.findById(userId);
+    // if (user.usertype !== 'admin') return res.status(403).send({ ... });
+
+
     const { title, imageUrl } = req.body;
     // validation
     if (!title | !imageUrl) {
@@ -12,7 +20,11 @@ const createCategoryController = async (req, res) => {
         error: error.message
       })
     }
-    const newCategory = new categoryModel({ title, imageUrl })
+    const newCategory = new categoryModel({ 
+      title, 
+      imageUrl 
+      // createdBy: userId, // optional
+    })
     // saving newCategory 
     await newCategory.save();
     res.status(201).send({

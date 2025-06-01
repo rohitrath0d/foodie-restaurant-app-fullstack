@@ -118,4 +118,126 @@ const loginController = async(req, res) => {
   }
 }
 
-module.exports = { registerController, loginController };
+// Controller for admin registration
+const registerAdminController = async (req, res) => {
+  try {
+    // only existing admins can create new admins
+    const { userName, email, password, phone, address, answer } = req.body;
+
+    // validation
+    if(!userName || !email || !password || !address || !phone || !answer) {
+      return res.status(500).send({
+        success: false,
+        message: "Please provide all required fields",
+      });
+    }
+
+    // check if user already exists
+    const existingUser = await userModel.findOne({email});
+    if(existingUser) {
+      return res.status(400).send({
+        success: false,
+        message: "User already exists. Please try Log in.",
+      });
+    }
+
+    // hashing password
+     const salt = bcrypt.genSaltSync(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const newAdmin = await userModel.create({
+      userName,
+      email,
+      password: hashedPassword,
+      address,
+      phone,
+      answer,
+      usertype: 'admin'
+    });
+
+     res.status(201).send({
+      success: true,
+      message: "Admin registered successfully",
+      newAdmin,
+    });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: "Error in Admin Registration API",
+      error: error.message
+    })
+    
+  }
+}
+
+
+// Add this new controller (only accessible by superadmin)
+const promoteToAdminController = async (req, res) => {
+  try {
+    const { email } = req.body;           // // also can use userId
+
+    // Validate requestor is superAdmin (already checked by middleware)
+    if (!email) {
+      return res.status(400).send({
+        success: false,
+        message: "Email ID to promote is required",
+      });
+    }
+
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      return res.status(404).send({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+
+    // / Find and update the user
+    // const user = await userModel.findByIdAndUpdate(
+    //   userIdToPromote,
+    //   { $set: { usertype: "admin" } },
+    //   { new: true } // Return updated user
+    // );
+
+
+    // if (!user) {
+    //   return res.status(404).json({ 
+    //     success: false, 
+    //     message: "User not found" 
+    //   });
+    // }
+
+    // res.status(200).json({
+    //   success: true,
+    //   message: "User promoted to admin successfully",
+    //   user
+    // });
+
+    if (user.usertype === "admin" || user.usertype === "superadmin") {
+      return res.status(400).send({
+        success: false,
+        message: "User is already an admin/superadmin",
+      });
+    }
+
+    user.usertype = "admin";
+    await user.save();
+
+    res.status(200).send({
+      success: true,
+      message: "User promoted to admin successfully",
+      user,
+    });
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      message: "Error in promoting user",
+      error: error.message,
+    });
+  }
+};
+
+module.exports = { registerController, loginController, registerAdminController, promoteToAdminController };

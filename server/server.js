@@ -6,6 +6,9 @@ const colors = require("colors");
 const morgan = require("morgan"); // also a middleware package
 const dotenv = require("dotenv");
 const { connectDb } = require("./config/db");
+const userModel = require("./models/userModel");
+const bcrypt = require("bcryptjs");
+
 
 // dot env configuration
 // dotenv.config({path: './env'})
@@ -28,6 +31,42 @@ const corsOptions    = {
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 };
+
+
+const createSuperAdmin = async () => {
+  try {
+    // const superAdminEmail = process.env.SUPERADMIN_EMAIL || "superadmin@example.com";
+    const superAdminEmail = process.env.SUPERADMIN_EMAIL;
+    const existingSuperAdmin = await userModel.findOne({ email: superAdminEmail });
+    
+    if (!existingSuperAdmin) {
+      const hashedPassword = await bcrypt.hash(
+        // process.env.SUPERADMIN_PASSWORD || "Super@1234", 
+        process.env.SUPERADMIN_PASSWORD, 
+        10
+      );
+      
+      await userModel.create({
+        userName: "Super Admin",
+        email: superAdminEmail,
+        password: hashedPassword,
+        address: "System Default",
+        phone: "0000000000",
+        answer: "system",
+        usertype: "superadmin"
+      });
+      console.log("✅ Super Admin created successfully!");
+    }
+  } catch (error) {
+    console.error("❌ Super Admin creation failed:", error.message);
+  }
+};
+
+
+// Call this function when the server starts
+createSuperAdmin();
+
+
 
 // middleware
 // cors -> middleware -> application start hone se pehle (yaani request aane ke turant baad aur response jane se pehle) ye middle mai kaam karega
