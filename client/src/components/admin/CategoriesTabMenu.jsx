@@ -3,7 +3,8 @@ import React, { useEffect, useState } from "react";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 // import { FoodCategory } from "@/types";
-import { useCategoryStore } from '../../store/useCategoryStore'
+// import { useCategoryStore } from '../../store/useCategoryStore'
+import useCategoryStore from '../../store/useCategoryStore'
 import { Plus, Edit, Trash2, Loader2 } from "lucide-react";
 import {
   Dialog,
@@ -15,8 +16,7 @@ import {
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Toaster, toast } from "../../components/ui/sonner";
-
-
+import { DialogDescription } from "@radix-ui/react-dialog";
 
 
 // interface CategoriesTabProps {
@@ -37,10 +37,10 @@ const CategoriesTabMenu = () => {
   // });
 
   const [currentCategory, setCurrentCategory] = useState({
-  id: "",
-  title: "",
-  imageUrl: "",
-});
+    id: "",
+    title: "",
+    imageUrl: "",
+  });
 
 
   // Fetch categories on mount
@@ -56,54 +56,92 @@ const CategoriesTabMenu = () => {
       // name: "",
       // icon: "🍽️", // Default icon
 
-        id: "",
-        title: "",
-        imageUrl: "",               // add a default imageUrl here, if needed.
-});
+      id: "",
+      title: "",
+      imageUrl: "",               // add a default imageUrl here, if needed.
+    });
     setIsDialogOpen(true);
   };
 
   const handleEditClick = (category) => {
+
+    // Debug the received category object
+    console.log('Editing category:', category);
+  
+
+     if (!category._id) {
+      console.error("No ID provided for update");
+      return;
+    }
+
     setIsEditMode(true);
-    setCurrentCategory(category);
+    setCurrentCategory({
+      id: category._id,               // Use _id instead of id
+      title: category.title,
+      imageUrl: category.imageUrl
+
+    });
     setIsDialogOpen(true);
   };
 
   const handleDelete = async (id) => {
     // if (window.confirm('Are you sure you want to delete this category?')) {
-      // await deleteCategory(id);
-      // // Refresh the list after deletion
-      // await getAllCategory();
+    // await deleteCategory(id);
+    // // Refresh the list after deletion
+    // await getAllCategory();
 
-      try {
+    if (!id) {
+      console.error("No ID provided for deletion");
+      return;
+    }
+    try {
+      await deleteCategory(id);
+      await getAllCategory();
+      toast({
+        title: "Success",
+        description: "Category deleted successfully",
+        variant: "default",
+      });
 
-        await deleteCategory(id);
-        toast({
-          title: "Success",
-          description: "Category deleted successfully",
-          variant: "default",
-        });
-
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
-      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
     // }
   };
 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // While i do this, i am seeing the change of the id, that id is needed at even the time of the category creation process, and hence, this would not create without id. which we want to use it only on, delete and update.
+    // if (!id) {
+    //   console.error("No ID provided for update");
+    //   return;
+    // }
+
+
+    // Debug before submission
+    console.log('Current category state:', currentCategory);
+
     try {
       if (isEditMode) {
         // await updateCategory(currentCategory.id, {
         //   name: currentCategory.name,
         //   icon: currentCategory.icon,
         // });
-        await updateCategory(currentCategory.id, currentCategory);
+        if (!currentCategory.id) {
+        throw new Error("No category ID provided for update");
+      }
+        // await updateCategory(currentCategory.id, currentCategory);
+        // await updateCategory(currentCategory._id, {
+        await updateCategory(currentCategory.id, {
+          title: currentCategory.title,
+          imageUrl: currentCategory.imageUrl
+        })
         toast({
           title: "Success",
           description: "Category updated successfully",
@@ -114,7 +152,11 @@ const CategoriesTabMenu = () => {
         //   name: currentCategory.name,
         //   icon: currentCategory.icon,
         // });
-        await createCategory(currentCategory);
+        // await createCategory(currentCategory);
+        await createCategory({
+          title: currentCategory.title,
+          imageUrl: currentCategory.imageUrl
+        });
         toast({
           title: "Success",
           description: "Category created successfully",
@@ -122,6 +164,7 @@ const CategoriesTabMenu = () => {
         });
       }
       setIsDialogOpen(false);
+      await getAllCategory();       // Refresh the list
     } catch (err) {
       toast({
         title: "Error",
@@ -178,11 +221,12 @@ const CategoriesTabMenu = () => {
                   <h3 className="font-semibold">{category.name}</h3>
                 </div>
                 <div className="flex space-x-1">
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500" onClick={() => handleEditClick(category)}>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500" onClick={() => handleEditClick(category)}>       { /* // Pass entire category object */}
                     <Edit size={16} />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500" onClick={() => handleDelete(category.id)} >
-                    <Trash2 size={16} />
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500" onClick={() => handleDelete(category._id)} disabled = {isLoading} >
+                    {/* <Trash2 size={16} /> */}
+                      {isLoading ? <Loader2 className="animate-spin" /> : <Trash2 size={16} />}
                   </Button>
                 </div>
               </div>
@@ -197,6 +241,9 @@ const CategoriesTabMenu = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{isEditMode ? "Edit Category" : "Add New Category"}</DialogTitle>
+             <DialogDescription>
+              Are you sure you want to delete {category.title}? This action cannot be undone.
+            </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -235,8 +282,8 @@ const CategoriesTabMenu = () => {
                   name="imageUrl"
                   value={currentCategory.imageUrl}
                   onChange={handleChange}
-                  // maxLength={2}
-                  // className="w-16"
+                // maxLength={2}
+                // className="w-16"
                 />
               </div>
               {/* <div className="flex flex-wrap gap-2 mt-2">

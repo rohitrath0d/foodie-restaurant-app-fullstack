@@ -10,8 +10,11 @@ import SharedSidebarLayout from './layouts/SharedSidebarLayout';
 // Admin Pages
 import AdminLayout from './layouts/AdminLayout';
 import Dashboard from './pages/admin/AdminDashboard';             // have to make it customizable
-import RestaurantManagement from './pages/admin/RestaurantManagement'
+// import RestaurantManagement from './pages/admin/RestaurantManagement'
+import RestaurantParentComponent from './components/admin/RestaurantParentComponent';
+// import FoodItemParentComponent from './components/admin/FoodItemParentComponent';
 import MenuManagement from './pages/admin/MenuManagement';
+
 
 
 
@@ -40,7 +43,7 @@ function App() {
     <Route path='/admin' element={<AdminLayout/>}>
       <Route index element={<Dashboard/>}/>
       {/* <Route path='orders' element={<OrdersPage/>}/> */}
-      {/* <Route path='/restaurant-management' element={<RestaurantManagement/>}/> */}
+      <Route path='/admin/restaurant-management' element={<RestaurantParentComponent/>}/>
       <Route path='/admin/menu' element={<MenuManagement/>}/>
       {/* <Route path='menu' element={<MenuPage/>}/> */}
       {/* <Route path='settings' element={<SettingsPage/>}/> */}

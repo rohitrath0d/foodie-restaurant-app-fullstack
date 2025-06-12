@@ -1,8 +1,6 @@
-/* eslint-disable no-unused-vars */
 import { API_ROUTES } from '../utils/api';
 
 import axios from 'axios';
-import { state } from 'fs';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 

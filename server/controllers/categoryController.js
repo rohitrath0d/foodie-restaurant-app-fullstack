@@ -1,3 +1,4 @@
+const { default: mongoose } = require("mongoose");
 const categoryModel = require("../models/categoryModel");
 
 // create restaurant
@@ -77,11 +78,21 @@ const updateCategoryByIdController = async (req, res) => {
   try {
     const { id } = req.params;
     const { title, imageUrl } = req.body;
+    
+    // 1. Validate ID
+    if (!id) {
+      return res.status(400).json({ message: "Category ID is required" });
+    }
+
+    // 2. Check ObjectId validity
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid category ID format" });
+    }
     // the { new: true } option tells Mongoose:
     // “Hey, after updating, give me the updated document, not the old one.”
     //  Without { new: true }:
     // You would get the old version of the document (before the update), which is usually not helpful when you want to show the updated result immediately on the frontend.
-    const updateCategory = await categoryModel.findByIdAndUpdate(id, { title, imageUrl }, { new: true });       //   {new: true} -> ✅ return the updated document
+    const updateCategory = await categoryModel.findByIdAndUpdate(id, { title, imageUrl }, { new: true, runValidators: true });       //   {new: true} -> ✅ return the updated document
     if (!updateCategory) {
       return res.status(500).send({
         success: false,
@@ -114,6 +125,12 @@ const deleteCategoryByIdController = async (req, res) => {
         message: "Please provide Category ID",
       })
     }
+
+    // 2. Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid category ID" });
+    }
+    
     const category = await categoryModel.findById(id);
     if (!category) {
       return res.status(500).send({

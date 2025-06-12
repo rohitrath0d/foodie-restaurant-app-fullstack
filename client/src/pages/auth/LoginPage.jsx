@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 import React, { useState } from "react"
-import { useAuthStore } from "../../store/useAuthStore"
+// import { useAuthStore } from "../../store/useAuthStore"
+import useAuthStore from "../../store/useAuthStore"
 import { useNavigate } from "react-router-dom"
 import { Label } from "../../components/ui/label"
 import { Button } from "../../components/ui/button"
@@ -24,9 +25,9 @@ function LoginPage() {
 
 
   const [showPassword, setShowPassword] = useState(false);
-  const { login, isLoading } = useAuthStore()
+  const { login, user, isLoading } = useAuthStore();
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const form = useForm(
     {
       defaultValues: {
@@ -58,7 +59,10 @@ function LoginPage() {
         })
 
         const user = useAuthStore.getState().user
-        if (user?.role === 'admin') {
+        console.log('User object:', user); // Check the actual structure
+
+        // if (user?.role === 'admin' || user?.role === 'superadmin') {
+        if (user?.usertype === 'admin' || user?.usertype === 'superadmin') {
           navigate('/admin')
         } else {
           navigate('/home-page')

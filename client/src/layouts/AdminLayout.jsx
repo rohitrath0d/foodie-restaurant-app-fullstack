@@ -1,24 +1,98 @@
-import { Outlet, useLocation, Link } from "react-router-dom";
-import { Home, ClipboardList, BookOpen, Settings, ChevronRight, LogOut } from "lucide-react";
+/* eslint-disable no-unused-vars */
+import { Outlet, useLocation, Link, useNavigate } from "react-router-dom";
+// import {useAuthStore} from "../store/useAuthStore"
+import useAuthStore from "../store/useAuthStore";
+import { useEffect, useState } from "react"
+import { Home, ClipboardList, BookOpen, Settings, HandPlatter, ChevronRight, LogOut } from "lucide-react";
 import { cn } from "../lib/utils";
 import { Button } from "../components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../components/ui/tooltip";
+import { toast } from "../components/ui/sonner"
+// import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 
 const AdminLayout = () => {
+
   const location = useLocation();
-  
+  const navigate = useNavigate();
+  const { user, login, logout } = useAuthStore();
+
+  // Fetch admin data if not in store
+  // const { data: admin } = useQuery({
+  //   queryKey: ['admin'],
+  //   queryFn: async () => {
+  //     const response = await axios.get('/api/v1/auth');
+  //     return response.data;
+  //   },
+  //   enabled: !user, // Only fetch if user not in store
+  // });
+
+  // useEffect(() => {
+  //   if (admin) {
+  //     setUser(admin);
+  //   }
+  // }, [admin, setUser]);
+
+  // Verify admin role and authentication
+  useEffect(() => {
+    const verifyAdmin = async () => {
+      try {
+        // Check if user is logged in and is admin (not superadmin)
+        if (!user || user.usertype !== 'admin') {
+          navigate('/login');
+          return;
+        }
+
+        // Optional: Verify session with backend
+        // await axios.get(API_ENDPOINTS.GET_CURRENT_ADMIN, {
+        //   validateStatus: (status) => status === 200
+        // });
+
+      } catch (error) {
+        logout();
+        navigate('/api/v1/auth/login');
+        toast.error("Session expired. Please login again.");
+      }
+    };
+
+    verifyAdmin();
+  }, [user, navigate, logout]);
+
+  const handleLogout = async () => {
+    try {
+      // await axios.post(API_ENDPOINTS.LOGOUT);      // no need to do this, coz already setted up helper function for this in useAuthStore.js    
+      await logout();       // Uses the store's logout function
+
+      // Additional client-side cleanup
+      navigate('/api/v1/auth/login');
+      toast.success("Logged out successfully");
+    } catch (error) {
+      toast.error(error.message || "Logout failed");
+    }
+  };
+
   const navItems = [
-    { path: "/admin", label: "Dashboard", icon: Home },
+    { path: "/admin/restaurant-management", label: "Manage Restaurants", icon: HandPlatter },
+    { path: "/admin/menu", label: "Manage Menu", icon: BookOpen },
     { path: "/admin/orders", label: "Orders", icon: ClipboardList },
-    { path: "/admin/menu", label: "Menu", icon: BookOpen },
     { path: "/admin/settings", label: "Settings", icon: Settings },
+    { path: "/admin/dashboard", label: "Dashboard", icon: Home },
+
   ];
 
-  const mockAdmin = {
-    name: "John Doe",
-    role: "Restaurant Manager",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-  };
+  // const mockAdmin = {
+  //   name: "John Doe",
+  //   role: "Restaurant Manager",
+  //   avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+  // };
+
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -47,13 +121,20 @@ const AdminLayout = () => {
         </nav>
         <div className="absolute bottom-0 left-0 right-0 p-6">
           <div className="flex items-center mb-4">
-            <img src={mockAdmin.avatar} alt="Admin" className="w-10 h-10 rounded-full mr-3" />
+            {/* <img src={mockAdmin.avatar} alt="Admin" className="w-10 h-10 rounded-full mr-3" /> */}
+            <img src={user.avatar || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"} alt="Admin" className="w-10 h-10 rounded-full mr-3" />
             <div>
-              <p className="font-medium">{mockAdmin.name}</p>
-              <p className="text-xs text-gray-500">{mockAdmin.role}</p>
+              {/* <p className="font-medium">{mockAdmin.name}</p> */}
+              <p className="font-medium">{user.userName}</p>
+              {/* <p className="text-xs text-gray-500">{mockAdmin.role}</p> */}
+              <p className="text-xs text-gray-500">{user.usertype === 'superadmin' ? 'Super Admin' : 'Admin'}</p>
             </div>
           </div>
-          <Button variant="outline" className="w-full flex items-center justify-center text-gray-600">
+          <Button
+            variant="outline"
+            className="w-full flex items-center justify-center text-gray-600"
+            onClick={handleLogout}
+          >
             <LogOut size={16} className="mr-2" />
             <span>Logout</span>
           </Button>
@@ -68,12 +149,19 @@ const AdminLayout = () => {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button variant="ghost" size="icon">
-                  <img src={mockAdmin.avatar} alt="Admin" className="w-8 h-8 rounded-full" />
+                  {/* <img src={mockAdmin.avatar} alt="Admin" className="w-8 h-8 rounded-full" /> */}
+                  <img
+                    src={user.avatar || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"}
+                    alt="Admin"
+                    className="w-8 h-8 rounded-full"
+                  />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{mockAdmin.name}</p>
-                <p className="text-xs text-gray-500">{mockAdmin.role}</p>
+                {/* <p>{mockAdmin.name}</p> */}
+                <p>{user.userName}</p>
+                {/* <p className="text-xs text-gray-500">{mockAdmin.role}</p> */}
+                <p className="text-xs text-gray-500">{user.usertype === 'superadmin' ? 'Super Admin' : 'Admin'}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

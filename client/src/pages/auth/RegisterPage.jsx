@@ -1,7 +1,8 @@
 /* eslint-disable no-unused-vars */
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useAuthStore } from "../../store/useAuthStore";
+// import { useAuthStore } from "../../store/useAuthStore";
+import useAuthStore from "../../store/useAuthStore"
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import { Button } from "../../components/ui/button";

@@ -12,10 +12,14 @@ import FoodItemParentComponent from "../../components/admin/FoodItemParentCompon
 import { useFoodStore } from "../../store/useFoodStore";
 import CategoriesTabMenu from "@/components/admin/CategoriesTabMenu";
 import TagsTabMenu from "../../components/admin/TagsTabMenu";
+import useCategoryStore from "@/store/useCategoryStore";
+import { useTagStore } from "@/store/useTagStore";
 
 const MenuManagement = () => {
   const [activeTab, setActiveTab] = useState("menuItems");
   const {food} = useFoodStore();
+  const {category} = useCategoryStore();
+  const  {tags} = useTagStore();
 
   return (
     <div className="space-y-6">
@@ -34,9 +38,11 @@ const MenuManagement = () => {
         <TabsContent value="menuItems" className="space-y-6">
           <FoodItemParentComponent 
             menuItems={food} 
-            categories = {[]}
-            tags = {[]}
+            // categories = {[]}
+            categories = {category}
+            tags = {tags}
             // categories={mockCategories} 
+            // tags={mockTags} 
             // tags={mockTags} 
           />
         </TabsContent>

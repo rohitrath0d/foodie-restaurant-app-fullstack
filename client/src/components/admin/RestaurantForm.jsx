@@ -6,8 +6,9 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription }
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../../components/ui/form";
 import { Input } from "../../components/ui/input";
 import { motion } from "framer-motion";
-import { RestaurantCard } from "../admin/RestaurantCard"
+import RestaurantCard  from "../admin/RestaurantCard"
 import { useEffect } from "react";
+import { Switch } from "@radix-ui/react-switch";
 
 
 const RestaurantForm = ({ restaurant, onSuccess, onCancel }) => {

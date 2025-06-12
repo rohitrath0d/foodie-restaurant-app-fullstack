@@ -1,6 +1,6 @@
 const userModel = require("../models/userModel");
 const bcrypt = require('bcryptjs')
-const JWT = require('jsonwebtoken')  
+const JWT = require('jsonwebtoken')
 
 // register controller:-
 const registerController = async (req, res) => {
@@ -59,21 +59,21 @@ const registerController = async (req, res) => {
 };
 
 // LOGIN
-const loginController = async(req, res) => {
+const loginController = async (req, res) => {
   try {
     // for login we only need email & password
-    const {email, password} = req.body;
+    const { email, password } = req.body;
     // validation
-    if(!email || !password){
+    if (!email || !password) {
       return res.status(500).send({
         success: false,
         message: "Email and Password is required",
-        error,
+        // error,
       })
     }
     // check user
-    const loginUser = await userModel.findOne( {email });
-    if(!loginUser){
+    const loginUser = await userModel.findOne({ email });
+    if (!loginUser) {
       return res.status(404).send({
         success: false,
         // message: "User doesn't exist. Please register.",      // for password also we have to provide separate validation -> lets do it later -> Done. check the isMatchPassword function
@@ -85,20 +85,20 @@ const loginController = async(req, res) => {
     // it takes 2 params -> 1. plain password 2. user that is getting the password
     const isMatchPassword = await bcrypt.compare(password, loginUser.password)
     // validation for password check.
-    if(!isMatchPassword){
+    if (!isMatchPassword) {
       return res.status(500).send({
-        success: false, 
+        success: false,
         message: "Invalid Credentials"
       })
     }
 
     // token
-    const token = JWT.sign({id: loginUser._id }, process.env.JWT_SECRET, {
+    const token = JWT.sign({ id: loginUser._id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });
     // console.log(token);
-    
-    
+
+
     loginUser.password = undefined;
 
     // if all the above response, is successful, then send the login response.
@@ -107,14 +107,14 @@ const loginController = async(req, res) => {
       message: "User login successfully done!",
       token,
       loginUser,
-    }) ;
+    });
   } catch (error) {
     console.log(error);
     res.status(500).send({
       success: false,
       message: "Error in Login APi",
       error: error.message
-    }) 
+    })
   }
 }
 
@@ -125,7 +125,7 @@ const registerAdminController = async (req, res) => {
     const { userName, email, password, phone, address, answer } = req.body;
 
     // validation
-    if(!userName || !email || !password || !address || !phone || !answer) {
+    if (!userName || !email || !password || !address || !phone || !answer) {
       return res.status(500).send({
         success: false,
         message: "Please provide all required fields",
@@ -133,16 +133,35 @@ const registerAdminController = async (req, res) => {
     }
 
     // check if user already exists
-    const existingUser = await userModel.findOne({email});
-    if(existingUser) {
-      return res.status(400).send({
-        success: false,
-        message: "User already exists. Please try Log in.",
+    const existingUser = await userModel.findOne({ email });
+    // If user exists AND isn't an admin, upgrade them to admin
+    if (existingUser) {
+      // return res.status(400).send({
+      //   success: false,
+      //   message: "User already exists. Please try Log in.",
+      // });
+      if (existingUser.usertype === "admin" || existingUser.usertype === "superadmin") {
+        return res.status(409).json({
+          success: false,
+          message: "Admin with this email already exists",
+        });
+      }
+
+      // Upgrade normal user to admin
+      existingUser.usertype = "admin";
+      existingUser.userName = userName;
+      // Update other fields if needed
+      await existingUser.save();
+
+      return res.status(200).send({
+        success: true,
+        message: "Existing user promoted to admin",
+        user: existingUser,
       });
     }
 
     // hashing password
-     const salt = bcrypt.genSaltSync(10);
+    const salt = bcrypt.genSaltSync(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const newAdmin = await userModel.create({
@@ -155,7 +174,9 @@ const registerAdminController = async (req, res) => {
       usertype: 'admin'
     });
 
-     res.status(201).send({
+    newAdmin.password = undefined;         // Never return password
+
+    res.status(201).send({
       success: true,
       message: "Admin registered successfully",
       newAdmin,
@@ -168,10 +189,13 @@ const registerAdminController = async (req, res) => {
       message: "Error in Admin Registration API",
       error: error.message
     })
-    
+
   }
 }
 
+
+// /register-admin: Creates brand new admin accounts (with all required fields)
+// promote-to-admin: Upgrades existing normal users to admins (only needs email/userID)
 
 // Add this new controller (only accessible by superadmin)
 const promoteToAdminController = async (req, res) => {
@@ -216,6 +240,14 @@ const promoteToAdminController = async (req, res) => {
     //   user
     // });
 
+
+    // if (user.usertype !== "user") { // Only promote normal users
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "User already has elevated privileges",
+    //   });
+    // }
+
     if (user.usertype === "admin" || user.usertype === "superadmin") {
       return res.status(400).send({
         success: false,
@@ -225,6 +257,11 @@ const promoteToAdminController = async (req, res) => {
 
     user.usertype = "admin";
     await user.save();
+
+
+    // Optional: Send promotion email here
+    // await sendAdminPromotionEmail(user.email, user.userName);
+
 
     res.status(200).send({
       success: true,
