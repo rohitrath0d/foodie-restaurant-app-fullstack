@@ -6,16 +6,27 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Edit, Trash2 } from "lucide-react";
 // import { data } from "react-router-dom";
 import { useFoodStore } from "../../store/useFoodStore";
+// import {
+//   AlertDialog,
+//   AlertDialogAction,
+//   AlertDialogCancel,
+//   AlertDialogContent,
+//   AlertDialogDescription,
+//   AlertDialogFooter,
+//   AlertDialogHeader,
+//   AlertDialogTitle,
+// } from "../ui/alert-dialog";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "../ui/alert-dialog";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose,
+  DialogDescription,
+  DialogFooter,
+
+} from "../../components/ui/dialog";
 import { toast } from "../ui/sonner";
 // import FallbackImage from "../../../public/fallback-image.jpg"       // -> vite doesn't allow to directly import images from the src directory
 import PropTypes from 'prop-types';
@@ -50,7 +61,8 @@ const FoodItemCard = ({ food, onEdit, onDelete }) => {
     setIsDeleting(true);
 
     try {
-      await deleteFood(food.id);
+      // await deleteFood(food.id);
+      onDelete(food.id)
       // onDelete(restaurant.id);
       toast({
         title: "Success",
@@ -79,7 +91,7 @@ const FoodItemCard = ({ food, onEdit, onDelete }) => {
       <Card key={food.id} className={"overflow-hidden"}>
         <div className="relative h-40">
           <img
-            src={food?.imageUrl || "/fallback-image.jpg"} 
+            src={food?.imageUrl || "/fallback-image.jpg"}
             alt={food?.title || "Food Item"}
             className="w-full h-full object-cover"
           />
@@ -127,7 +139,6 @@ const FoodItemCard = ({ food, onEdit, onDelete }) => {
         */}
 
 
-
           <div className="flex justify-end space-x-2 mt-4">
             <Button
               variant="outline"
@@ -160,31 +171,29 @@ const FoodItemCard = ({ food, onEdit, onDelete }) => {
       </Card >
 
 
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
-            <AlertDialogDescription>
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogDescription>
               Are you sure you want to delete {food.title}? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose disabled={isDeleting}>Cancel</DialogClose>
+            <DialogTrigger
               onClick={handleDelete}
               disabled={isDeleting}
               className="bg-red-500 hover:bg-red-600"
             >
               {isDeleting ? "Deleting..." : "Delete"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            </DialogTrigger>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }
-
-
 
 FoodItemCard.propTypes = {
   food: PropTypes.shape({

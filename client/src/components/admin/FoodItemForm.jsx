@@ -226,9 +226,9 @@ const FoodItemForm = ({ food, onSuccess, onCancel, categories, tags, restaurantI
 
 
   return (
-    <Card className="w-full">
-      <CardContent className="pt-6">
-        <form onSubmit={handleSubmit} className="space-y-4">
+    // <Card className="w-full max-w-3xl mx-auto">
+      // <CardContent className="pt-10 pb-10 px-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
 
           <div>
             <label htmlFor="title" className="block text-sm font-medium mb-1">
@@ -243,7 +243,8 @@ const FoodItemForm = ({ food, onSuccess, onCancel, categories, tags, restaurantI
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          {/* <div className="grid grid-cols-2 gap-4"> */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label htmlFor="price" className="block text-sm font-medium mb-1">
                 {/* Price ($) */}
@@ -308,7 +309,8 @@ const FoodItemForm = ({ food, onSuccess, onCancel, categories, tags, restaurantI
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          {/* <div className="grid grid-cols-2 gap-4"> */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex items-center space-x-2">
               <Switch
                 id="isAvailable"
@@ -334,7 +336,8 @@ const FoodItemForm = ({ food, onSuccess, onCancel, categories, tags, restaurantI
           </div>
 
           {editedItem.hasCoupon && (
-            <div className="grid grid-cols-2 gap-4">
+            // <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="couponCode" className="block text-sm font-medium mb-1">
                   Coupon Code
@@ -369,7 +372,7 @@ const FoodItemForm = ({ food, onSuccess, onCancel, categories, tags, restaurantI
               {(tags || []).map((tag) => (
                 <div
                   key={tag.id}
-                  className={`text-xs px-3 py-1 rounded-full cursor-pointer ${selectedTags.includes(tag.id)
+                  className={`text-xs px-3 py-1 rounded-full cursor-pointer border transition ${selectedTags.includes(tag.id)
                     ? `bg-${tag.color} text-white`
                     : "bg-gray-100 text-gray-700"
                     }`}
@@ -396,8 +399,8 @@ const FoodItemForm = ({ food, onSuccess, onCancel, categories, tags, restaurantI
             </Button>
           </div>
         </form>
-      </CardContent>
-    </Card>
+      // </CardContent>
+    // </Card>
   );
 
   // // Small reusable input component

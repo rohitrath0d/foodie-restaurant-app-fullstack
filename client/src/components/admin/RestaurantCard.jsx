@@ -5,16 +5,29 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Edit, Trash2 } from "lucide-react";
 // import { data } from "react-router-dom";
 import { useRestaurantStore } from "../../store/useRestaurantStore";
+// import {
+//   AlertDialog,
+//   AlertDialogAction,
+//   AlertDialogCancel,
+//   AlertDialogContent,
+//   AlertDialogDescription,
+//   AlertDialogFooter,
+//   AlertDialogHeader,
+//   AlertDialogTitle,
+// } from "../ui/alert-dialog";
+
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "../ui/alert-dialog";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose,
+  DialogDescription,
+  DialogFooter,
+
+} from "../../components/ui/dialog";
+
 import { toast } from "../ui/sonner";
 
 
@@ -150,26 +163,26 @@ const RestaurantCard = ({ restaurant, onEdit, onDelete }) => {
       </Card >
 
 
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
-            <AlertDialogDescription>
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogDescription>
               Are you sure you want to delete {restaurant.title}? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose disabled={isDeleting}>Cancel</DialogClose>
+            <DialogTrigger
               onClick={handleDelete}
               disabled={isDeleting}
               className="bg-red-500 hover:bg-red-600"
             >
               {isDeleting ? "Deleting..." : "Delete"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            </DialogTrigger>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

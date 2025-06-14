@@ -6,7 +6,9 @@ import { motion } from "framer-motion";
 // import { useToast } from "../../hooks/use-toast";
 import { Toaster, toast } from "../../components/ui/sonner"
 import { LogOut } from "lucide-react";
-import { useAuthStore } from "../../store/useAuthStore";
+// import { useAuthStore } from "../../store/useAuthStore";
+import useAuthStore from "../../store/useAuthStore";
+
 
 const LogoutFallback = () => {
   const { logout } = useAuthStore();
@@ -20,7 +22,7 @@ const LogoutFallback = () => {
         title: "Logged out",
         description: "You've been successfully logged out.",
       });
-      navigate("api/v1/auth/login");
+      navigate('/login');
     }, 2000);
 
     return () => clearTimeout(timer);

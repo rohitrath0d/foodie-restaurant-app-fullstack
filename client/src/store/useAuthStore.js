@@ -84,11 +84,12 @@ const useAuthStore = create(
       logout: async () => {
         set({ isLoading: true, error: null });
         try {
-          await axiosInstance.post(`${API_ROUTES.AUTH}/logout`);
+          // await axiosInstance.post(`${API_ROUTES.AUTH}/logout`);
           set({ 
             user: null,
             token: null,
-            isLoading: false
+            isLoading: false,
+            error: null
           });
         } catch (error) {
           set({

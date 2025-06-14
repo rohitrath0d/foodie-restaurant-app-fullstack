@@ -10,15 +10,11 @@ import SharedSidebarLayout from './layouts/SharedSidebarLayout';
 // Admin Pages
 import AdminLayout from './layouts/AdminLayout';
 import Dashboard from './pages/admin/AdminDashboard';             // have to make it customizable
-// import RestaurantManagement from './pages/admin/RestaurantManagement'
+import RestaurantManagement from './pages/admin/RestaurantManagement'
 import RestaurantParentComponent from './components/admin/RestaurantParentComponent';
 // import FoodItemParentComponent from './components/admin/FoodItemParentComponent';
 import MenuManagement from './pages/admin/MenuManagement';
-
-
-
-
-
+import LogoutFallback from './pages/auth/LogoutFallback';
 
 
 
@@ -36,14 +32,16 @@ function App() {
     <Route>
       <Route path='/' element={<SharedSidebarLayout/>}/>
       {/* <Route path='/' element={<div className=''>Helloo </div>}/> */}
-    <Route path='/api/v1/auth/register' element={<RegisterPage/>}/>
-    <Route path='/api/v1/auth/login' element={<LoginPage/>}/>
+      <Route path='/register' element={<RegisterPage/>}/>
+      <Route path='/login' element={<LoginPage/>}/>
+      <Route path='/logout' element={<LogoutFallback/>}/>
     </Route>
+    
     {/* Admin routes */}
     <Route path='/admin' element={<AdminLayout/>}>
       <Route index element={<Dashboard/>}/>
       {/* <Route path='orders' element={<OrdersPage/>}/> */}
-      <Route path='/admin/restaurant-management' element={<RestaurantParentComponent/>}/>
+      <Route path='/admin/restaurant-management' element={<RestaurantManagement/>}/>
       <Route path='/admin/menu' element={<MenuManagement/>}/>
       {/* <Route path='menu' element={<MenuPage/>}/> */}
       {/* <Route path='settings' element={<SettingsPage/>}/> */}

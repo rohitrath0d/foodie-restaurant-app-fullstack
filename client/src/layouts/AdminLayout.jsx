@@ -3,13 +3,13 @@ import { Outlet, useLocation, Link, useNavigate } from "react-router-dom";
 // import {useAuthStore} from "../store/useAuthStore"
 import useAuthStore from "../store/useAuthStore";
 import { useEffect, useState } from "react"
-import { Home, ClipboardList, BookOpen, Settings, HandPlatter, ChevronRight, LogOut } from "lucide-react";
+import { Home, ClipboardList, BookOpen, Settings, HandPlatter, ChevronRight, LogOut, Loader2 } from "lucide-react";
 import { cn } from "../lib/utils";
 import { Button } from "../components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../components/ui/tooltip";
 import { toast } from "../components/ui/sonner"
-// import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
+
+
 
 const AdminLayout = () => {
 
@@ -38,6 +38,7 @@ const AdminLayout = () => {
     const verifyAdmin = async () => {
       try {
         // Check if user is logged in and is admin (not superadmin)
+        // if (!user || user.usertype !== 'admin') {
         if (!user || user.usertype !== 'admin') {
           navigate('/login');
           return;
@@ -48,9 +49,11 @@ const AdminLayout = () => {
         //   validateStatus: (status) => status === 200
         // });
 
+        // here, we can do check from backend at API_ROUTES.AUTH/user
+
       } catch (error) {
         logout();
-        navigate('/api/v1/auth/login');
+        navigate('/login');
         toast.error("Session expired. Please login again.");
       }
     };
@@ -64,7 +67,7 @@ const AdminLayout = () => {
       await logout();       // Uses the store's logout function
 
       // Additional client-side cleanup
-      navigate('/api/v1/auth/login');
+      navigate('/login');
       toast.success("Logged out successfully");
     } catch (error) {
       toast.error(error.message || "Logout failed");

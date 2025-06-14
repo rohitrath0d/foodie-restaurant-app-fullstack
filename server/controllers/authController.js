@@ -118,6 +118,10 @@ const loginController = async (req, res) => {
   }
 }
 
+// we can also create a login controller on the backend.
+
+
+
 // Controller for admin registration
 const registerAdminController = async (req, res) => {
   try {

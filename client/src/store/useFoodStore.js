@@ -4,12 +4,26 @@ import { API_ROUTES } from '../utils/api';
 import axios from 'axios';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import useAuthStore from './useAuthStore';
 
 // Axios instance setup
-const axiosInstance = axios.create({
+const foodAxios = axios.create({
   baseURL: API_ROUTES.FOOD,
   withCredentials: true,
 });
+
+
+// Add auth interceptor to inject token
+foodAxios.interceptors.request.use((config) => {
+  const token = useAuthStore.getState().token;
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+
+
 
 export const useFoodStore = create(
   persist(
@@ -22,7 +36,7 @@ export const useFoodStore = create(
       createFood: async (title, description, price, imageUrl, foodTags, category, code, isAvailable, restaurant, rating) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await axiosInstance.post(`${API_ROUTES.FOOD}/createFood`, {
+          const response = await foodAxios.post(`${API_ROUTES.FOOD}/createFood`, {
             title, description, price, imageUrl, foodTags, category, code, isAvailable, restaurant, rating
           });
           set({ isLoading: false });
@@ -41,7 +55,7 @@ export const useFoodStore = create(
       getAllFood: async () => {
         set({ isLoading: true, error: null });
         try {
-          const response = await axiosInstance.get(`${API_ROUTES.FOOD}/getAllFood`);
+          const response = await foodAxios.get(`${API_ROUTES.FOOD}/getAllFood`);
           console.log('FoodResponse', response);
           // set({ isLoading: false, foods: response.data.foods }); 
           set({ isLoading: false, food: response.data.foods }); // Changed from foods to food
@@ -61,7 +75,7 @@ export const useFoodStore = create(
       getFoodById: async (foodId) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await axiosInstance.get(`${API_ROUTES.FOOD}/getFoodByRestaurantId/${foodId}`);
+          const response = await foodAxios.get(`${API_ROUTES.FOOD}/getFoodByRestaurantId/${foodId}`);
 
           set({ isLoading: false, food: response.data.food });
         } catch (error) {
@@ -78,7 +92,7 @@ export const useFoodStore = create(
       getFoodByRestaurantId: async (restaurantId) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await axiosInstance.get(`${API_ROUTES.FOOD}/getFoodByRestaurantId/${restaurantId}`);
+          const response = await foodAxios.get(`${API_ROUTES.FOOD}/getFoodByRestaurantId/${restaurantId}`);
 
           set({ isLoading: false, food: response.data.food });
         } catch (error) {
@@ -125,7 +139,7 @@ export const useFoodStore = create(
       updateFood: async (foodID, updatedFood) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await axiosInstance.put(`${API_ROUTES.FOOD}/updateFood/${foodID}`, updatedFood);
+          const response = await foodAxios.put(`${API_ROUTES.FOOD}/updateFood/${foodID}`, updatedFood);
           
           // set({ user: null, isLoading: false });
           // IMPORTANT POINT TO BE NOTED:
@@ -154,10 +168,10 @@ export const useFoodStore = create(
       },
 
       // take id here,
-      deleteFood: async (foodId) => {
+      deleteFood: async (id) => {
         set({ isLoading: true, error: null });
         try {
-          await axiosInstance.delete(`${API_ROUTES.FOOD}/deleteFood/${foodId}`);
+          await foodAxios.delete(`${API_ROUTES.FOOD}/deleteFood/${id}`);
           set({ user: null, isLoading: false });
         } catch (error) {
           set({
