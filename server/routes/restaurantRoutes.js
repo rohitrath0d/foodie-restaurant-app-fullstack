@@ -8,7 +8,6 @@ const router = express.Router();
 // CREATE RESTAURANT || POST
 router.post('/createRestaurant', authMiddleware, createRestaurantController);
 
-
 // GET ALL RESTAURANTS || GET
 router.get("/getAllRestaurants", getAllRestaurantsController);
 
