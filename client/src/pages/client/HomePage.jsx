@@ -12,13 +12,13 @@
 
 
 import { useState, useEffect } from "react";
-import { RestaurantCard } from "@/components/shared/RestaurantCard";
-import { FoodCard } from "@/components/shared/FoodCard";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { RestaurantCard } from "../../components/shared/RestaurantCard";
+import { FoodCard } from "../../components/shared/FoodCard";
+import { Input } from "../../components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { Button } from "../../components/ui/button";
+import { Card, CardContent } from "../../components/ui/card";
+import { Badge } from "../../components/ui/badge";
 import { Search, MapPin, ArrowRight, Clock, Utensils, Tag, Star } from "lucide-react";
 // import { Restaurant, FoodItem, FoodTag } from "@/types";
 import { motion } from "framer-motion";
