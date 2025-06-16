@@ -4,7 +4,8 @@ import { Card, CardContent } from "../ui/card";
 // import { FoodTag } from "@/types";
 import PropTypes from "prop-types";
 import { Plus, Edit, Trash2 } from "lucide-react";
-import { useTagStore } from "../../store/useTagStore"
+// import { useTagStore } from "../../store/useTagStore"
+import useTagStore  from "../../store/useTagStore"
 import {
   Dialog,
   DialogContent,
@@ -64,14 +65,14 @@ const TagsTabMenu = () => {
   const handleDeleteClick = async (tagId) => {
     try {
       await deleteTag(tagId);
-      toast({
-        title: "Success",
+      toast.success( "Success",{
+        // title: "Success",
         description: "Tag deleted successfully",
         variant: "default",
       });
     } catch (err) {
-      toast({
-        title: "Error",
+      toast.error("Error",{
+        // title: "Error",
         description: err.message,
         variant: "destructive",
       });
@@ -87,8 +88,8 @@ const TagsTabMenu = () => {
           color: currentTag.color,
         });
         // await updateTag(currentTag.id, currentTag); 
-        toast({
-          title: "Success",
+        toast.success("Success",{
+          // title: "Success",
           description: "Tag updated successfully",
           variant: "default",
         });
@@ -99,16 +100,16 @@ const TagsTabMenu = () => {
         // });                                    //  --> this is double-nesting the payload data. You're wrapping the object twice → createTag({ name: currentTag }) . Just pass the object directly → createTag(currentTag)
         await createTag(currentTag);
         // await createTag(currentTag.name, currentTag.color);
-        toast({
-          title: "Success",
+        toast.success("Success",{
+          // title: "Success",
           description: "Tag created successfully",
           variant: "default",
         });
       }
       setIsDialogOpen(false);
     } catch (err) {
-      toast({
-        title: "Error",
+      toast.error("Error",{
+        // title: "Error",
         description: err.message,
         variant: "destructive",
       });

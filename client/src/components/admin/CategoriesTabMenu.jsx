@@ -26,7 +26,16 @@ import { DialogDescription } from "@radix-ui/react-dialog";
 // const CategoriesTabMenu: React.FC<CategoriesTabProps> = ({ categories }) => {
 const CategoriesTabMenu = () => {
 
-  const { category, getAllCategory, createCategory, updateCategory, deleteCategory, isLoading, error, } = useCategoryStore();
+  const {
+    // category,
+    categories,
+    getAllCategory,
+    createCategory,
+    updateCategory,
+    deleteCategory,
+    isLoading,
+    error,
+  } = useCategoryStore();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -67,9 +76,9 @@ const CategoriesTabMenu = () => {
 
     // Debug the received category object
     console.log('Editing category:', category);
-  
 
-     if (!category._id) {
+
+    if (!category._id) {
       console.error("No ID provided for update");
       return;
     }
@@ -97,18 +106,27 @@ const CategoriesTabMenu = () => {
     try {
       await deleteCategory(id);
       await getAllCategory();
-      toast({
-        title: "Success",
-        description: "Category deleted successfully",
-        variant: "default",
-      });
+      // toast({
+      //   title: "Success",
+      //   description: "Category deleted successfully",
+      //   variant: "default",
+      // });
+      toast.success("Category deleted!", {
+        description: "Deleted category successfully..",
+        variant: "success",
+        position: "bottom-center"
+      })
 
     } catch (error) {
-      toast({
-        title: "Error",
+      // toast({
+      //   title: "Error",
+      //   description: error.message,
+      //   variant: "destructive",
+      // });
+      toast.error("Error", {
         description: error.message,
-        variant: "destructive",
-      });
+        variant: "destructive"
+      })
     }
     // }
   };
@@ -134,19 +152,25 @@ const CategoriesTabMenu = () => {
         //   icon: currentCategory.icon,
         // });
         if (!currentCategory.id) {
-        throw new Error("No category ID provided for update");
-      }
+          throw new Error("No category ID provided for update");
+        }
         // await updateCategory(currentCategory.id, currentCategory);
         // await updateCategory(currentCategory._id, {
         await updateCategory(currentCategory.id, {
           title: currentCategory.title,
           imageUrl: currentCategory.imageUrl
         })
-        toast({
-          title: "Success",
-          description: "Category updated successfully",
-          variant: "default",
-        });
+        // toast({
+        //   title: "Success",
+        //   description: "Category updated successfully",
+        //   variant: "default",
+        // });
+        toast.success("Success!", {
+        description: "Updated category successfully..",
+        variant: "success",
+        position: "bottom-center"
+
+      })
       } else {
         // await createCategory({
         //   name: currentCategory.name,
@@ -157,17 +181,19 @@ const CategoriesTabMenu = () => {
           title: currentCategory.title,
           imageUrl: currentCategory.imageUrl
         });
-        toast({
-          title: "Success",
+        toast.success( "Success",
+          {
+          // title: "Success",
           description: "Category created successfully",
-          variant: "default",
+          variant: "success",
         });
       }
       setIsDialogOpen(false);
       await getAllCategory();       // Refresh the list
     } catch (err) {
-      toast({
-        title: "Error",
+      toast.error("Error",
+        {
+        // title: "Error",
         description: err.message,
         variant: "destructive",
       });
@@ -190,7 +216,9 @@ const CategoriesTabMenu = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Food Categories</h2>
-        <Button onClick={handleAddClick} disabled={isLoading}>
+        <Button
+          onClick={handleAddClick}
+          disabled={isLoading}>
           {isLoading ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
@@ -201,39 +229,94 @@ const CategoriesTabMenu = () => {
         </Button>
       </div>
 
-      {isLoading && <div className="flex justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>}
-      {error && (
+      {isLoading && categories.length === 0 ? (
+
+        <div className="flex justify-center">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+
+      ) : error ? (
+
         <div className="text-red-500">{error}</div>
+
+      ) : categories.length === 0 ? (
+
+        <div className="text-center py-10">No categories available</div>
+
+      ) : (
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {categories.map((cat) => (
+            <Card key={cat._id}> {/* Use _id instead of id */}
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    {cat.imageUrl && (
+                      <img
+                        src={cat.imageUrl}
+                        alt={cat.title}
+                        className="h-10 w-10 object-cover mr-2"
+                      />
+                    )}
+                    <h3 className="font-semibold">{cat.title}</h3>
+                  </div>
+                  <div className="flex space-x-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleEditClick(cat)}
+                    >
+                      <Edit size={16} />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDelete(cat._id)}
+                    >
+                      <Trash2 size={16} />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
       )}
+
+      {/* {error && (
+        <div className="text-red-500">{error}</div>
+      )} */}
 
       {/* Also add images for categories  */}
 
       {/* {isLoading ? (
         <div>Loading categories...</div>
       ) : ( */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {category?.map((category) => (
-          <Card key={category.id}>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <span className="text-2xl mr-2">{category.icon}</span>
-                  <h3 className="font-semibold">{category.name}</h3>
-                </div>
-                <div className="flex space-x-1">
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500" onClick={() => handleEditClick(category)}>       { /* // Pass entire category object */}
-                    <Edit size={16} />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500" onClick={() => handleDelete(category._id)} disabled = {isLoading} >
-                    {/* <Trash2 size={16} /> */}
-                      {isLoading ? <Loader2 className="animate-spin" /> : <Trash2 size={16} />}
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))};
-      </div>
+
+      {/* <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"> */}
+      {/* {category?.map((category) => ( */}
+      {/* <Card key={category.id}> */}
+      {/* <CardContent className="p-4"> */}
+      {/* <div className="flex items-center justify-between"> */}
+      {/* <div className="flex items-center"> */}
+      {/* <span className="text-2xl mr-2">{category.icon}</span> */}
+      {/* <h3 className="font-semibold">{category.name}</h3> */}
+      {/* </div> */}
+      {/* // <div className="flex space-x-1"> */}
+      {/* <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500" onClick={() => handleEditClick(category)}>       { /* // Pass entire category object */}
+      {/* <Edit size={16} /> */}
+      {/* </Button> */}
+      {/* <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500" onClick={() => handleDelete(category._id)} disabled={isLoading} > */}
+      {/* <Trash2 size={16} /> */}
+      {/* {isLoading ? <Loader2 className="animate-spin" /> : <Trash2 size={16} />} */}
+      {/* </Button> */}
+      {/* </div> */}
+      {/* </div> */}
+      {/* </CardContent> */}
+      {/* </Card> */}
+      {/* ))}; */}
+      {/* </div> */}
 
 
       {/* Add/Edit Category Dialog */}
@@ -241,8 +324,8 @@ const CategoriesTabMenu = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{isEditMode ? "Edit Category" : "Add New Category"}</DialogTitle>
-             <DialogDescription>
-              Are you sure you want to delete {category.title}? This action cannot be undone.
+            <DialogDescription>
+              Are you sure you want to delete {categories.title}? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">

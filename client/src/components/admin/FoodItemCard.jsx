@@ -51,10 +51,12 @@ const FoodItemCard = ({ food, onEdit, onDelete }) => {
   const handleEdit = () => {
     // This would typically open a modal or navigate to an edit page
     // For now, we'll just show a toast
-    toast({
-      title: "Edit Mode Activated",
-      description: `Preparing to edit ${food.title}`,
-    });
+    toast.success("Edit Mode Activated",
+      {
+        // title: "Edit Mode Activated",
+        description: `Preparing to edit ${food.title}`,
+        variant: "default"
+      });
   };
 
   const handleDelete = async () => {
@@ -64,22 +66,24 @@ const FoodItemCard = ({ food, onEdit, onDelete }) => {
       // await deleteFood(food.id);
       onDelete(food.id)
       // onDelete(restaurant.id);
-      toast({
-        title: "Success",
-        description: `${food.title} has been deleted`,
-        variant: "success",
-      });
+      toast.success("Success",
+        {
+          // title: "Success",
+          description: `${food.title} has been deleted`,
+          variant: "success",
+        });
     } catch (error) {
 
       console.error("Error deleting food item:", error);
       // You might want to refresh the list after deletion
       // Consider adding toast notification here
       // toast.error("Failed to delete restaurant");
-      toast({
-        title: "Error",
-        description: "Failed to delete food item",
-        variant: "destructive",
-      });
+      toast.error("Error",
+        {
+          // title: "Error",
+          description: "Failed to delete food item",
+          variant: "destructive",
+        });
     } finally {
       setIsDeleting(false);
       setIsDeleteDialogOpen(false);
@@ -147,8 +151,6 @@ const FoodItemCard = ({ food, onEdit, onDelete }) => {
               // onClick={handleDelete}
               onClick={() => setIsDeleteDialogOpen(true)}
               disabled={isDeleting}
-
-
             >
 
               <Trash2 size={14} className="mr-1" />
@@ -160,7 +162,13 @@ const FoodItemCard = ({ food, onEdit, onDelete }) => {
               variant="outline"
               size="sm"
               // onClick={() => onEdit(restaurant)}
-              onClick={handleEdit}
+              
+              // onClick={handleEdit}
+
+              onClick={() => {
+                handleEdit();       // Optional -> Shows the toast
+                onEdit();           // Required -> opens the edit dialog                  // Call the parent's edit handler
+              }}
             >
               <Edit size={14} className="mr-1" />
               Edit

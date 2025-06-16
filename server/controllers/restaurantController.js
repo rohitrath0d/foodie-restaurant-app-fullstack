@@ -110,7 +110,7 @@ const getRestaurantByIdController = async (req, res) => {
     });
 
   } catch (error) {
-    console.log("Error in get restaurant by Id: " , error);
+    console.log("Error in get restaurant by Id: ", error);
     res.status(500).send({
       success: false,
       message: "Error in Get Restaurant by ID APi.",
@@ -130,6 +130,7 @@ const updateRestaurantController = async (req, res) => {
         message: "Please provide Restaurant ID",
       });
     }
+    console.log('Received update for ID:', restaurantId);
 
     const {
       title,
@@ -164,7 +165,7 @@ const updateRestaurantController = async (req, res) => {
       },
       { new: true } // returns the updated document
     );
-
+    console.log('Update data:', req.body);
     if (!updatedRestaurant) {
       return res.status(404).send({
         success: false,
@@ -182,7 +183,7 @@ const updateRestaurantController = async (req, res) => {
     res.status(500).send({
       success: false,
       message: "Error in update restaurant API",
-      error,
+      error: error.message,
     });
   }
 };
@@ -195,13 +196,22 @@ const deleteRestaurantByIdController = async (req, res) => {
   try {
     const restaurantId = req.params.id;
     if (!restaurantId) {
-      return res.status(404).send({
+      // return res.status(404).send({    // ❌ 404 is for "Not Found"
+      return res.status(400).send({ // ✅ 400 is for "Bad Request"
         success: false,
-        message: "No Restaurant Found OR Provide Restaurant ID",
+        message: "No Restaurant Found with this ID OR Provide Restaurant ID",
         // error: error.message
       });
     }
     const deletedRestaurant = await restaurantModel.findByIdAndDelete(restaurantId);
+
+    if (!deletedRestaurant) {
+      return res.status(404).send({
+        success: false,
+        message: "Restaurant not found",
+      });
+    }
+
     res.status(200).send({
       success: true,
       message: "Restaurant Deleted Successfully",
@@ -212,7 +222,7 @@ const deleteRestaurantByIdController = async (req, res) => {
     res.status(500).send({
       success: false,
       message: "Error in delete Restaurant api",
-      error: message,
+      error: error.message,     //  error: message  --> this putting up directly would be undefined. coz there's no message, so have to take reference of error object to put it up with message function
     });
   }
 };

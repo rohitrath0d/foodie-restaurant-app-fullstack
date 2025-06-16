@@ -51,8 +51,11 @@ function LoginPage() {
     try {
       const success = await login(data.email, data.password)
       if (success) {
-        toast({
-          title: "Login Successful!",
+        toast.success(
+          // {
+          // title: "Login Successful!",
+          "Login Successful!", {
+
           description: 'Welcome back!',
           duration: 3000
         })
@@ -69,8 +72,10 @@ function LoginPage() {
       }
 
     } catch (error) {
-      toast({
-        title: 'Login Failed',
+      toast.error(
+        // {
+        // title: 'Login Failed',
+        "Login Failed", {
         description: error.message,
         variant: 'destructive'
       })
@@ -161,7 +166,9 @@ function LoginPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
+        // className="w-full max-w-md"
+        className="w-full max-w-xl"    // 36rem (~576px)
+
       >
         <Card className="border-0 shadow-lg backdrop-blur-xl bg-white/70 dark:bg-navy/70">
           <CardHeader className="space-y-1 text-center">
@@ -196,7 +203,7 @@ function LoginPage() {
                     }
                   }}
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="w-full">
                       <FormLabel>Email</FormLabel>
                       <FormControl>
                         <Input
@@ -216,7 +223,7 @@ function LoginPage() {
                   name="password"
                   rules={{ required: "Password is required" }}
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="w-full">
                       <FormLabel>Password</FormLabel>
                       <FormControl>
                         <div className="relative">
@@ -240,7 +247,8 @@ function LoginPage() {
                   )}
                 />
 
-                <Button type="submit" className="w-full bg-black text-white hover:bg-black transition-colors" disabled={isLoading}>
+                {/* <Button type="submit" className="w-full bg-black text-white hover:bg-black transition-colors" disabled={isLoading}>  // Commenting this line for button to be pink color not black */}
+                <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? (
                     <span className="flex items-center gap-2">
                       <span className="animate-spin rounded-full h-4 w-4 border-2 border-b-transparent border-white"></span>
@@ -253,19 +261,20 @@ function LoginPage() {
                   )}
                 </Button>
 
-                <FormDescription className="text-center">
+                {/* <FormDescription className="text-center">
                   <span>Demo credentials:</span>
                   <span>Admin: admin@example.com / password</span>
                   <span>Client: user@example.com / password</span>
-                </FormDescription>
+                </FormDescription> */}
               </form>
             </Form>
           </CardContent>
 
           <CardFooter className="flex flex-col gap-4">
-            <div className="text-center text-sm text-gray-500">
+            <div className="text-center text-sm text-gray-500 font-bold">
               Don't have an account?{" "}
-              <Link to="/api/v1/auth/register" className="text-coral hover:underline">
+              {/* <Link to="/api/v1/auth/register" className="text-coral hover:underline"> */}
+              <Link to="/register" className="text-coral hover:underline font-bold">
                 Sign up
               </Link>
             </div>

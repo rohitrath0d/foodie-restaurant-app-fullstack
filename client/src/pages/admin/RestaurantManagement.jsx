@@ -42,7 +42,9 @@ const RestaurantManagement = () => {
           /> */}
           {
             restaurants.length > 0 ? (
-              <RestaurantParentComponent restaurants = {restaurants}/>
+              <RestaurantParentComponent 
+                restaurants = {restaurants}
+              />
             ) : (
               <div  className="text-center py-8">
                 <p className="text-gray-500">

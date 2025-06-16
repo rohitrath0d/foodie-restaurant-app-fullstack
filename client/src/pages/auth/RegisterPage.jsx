@@ -10,21 +10,21 @@ import { Toaster, toast } from "../../components/ui/sonner";
 import { Input } from "../../components/ui/input";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle
 } from "../../components/ui/card";
-import { 
-  Form, 
-  FormControl, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage 
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
 } from "../../components/ui/form";
 
 
@@ -51,26 +51,29 @@ function RegisterPage() {
   const handleSubmit = async (data) => {
     try {
       const userId = await register(
-        data.name, 
-        data.email, 
-        data.password, 
-        data.phone, 
-        data.address, 
+        data.name,
+        data.email,
+        data.password,
+        data.phone,
+        data.address,
         data.answer
       );
-      
+
       if (userId) {
-        toast({
-          title: "Registration Successful!",
+        toast.success(
+          // title: "Registration Successful!",
+          "Login Successful!", {
+          description: "You can now log in!",
           duration: 3000,
         });
-        navigate('/auth/login');
+        navigate('/login');
       }
     } catch (error) {
-      toast({
-        title: 'Registration Failed',
+      toast.error(
+        // title: 'Registration Failed',
+        "Login Failed", {
         description: error.message,
-        variant: 'destructive'
+        variant: 'destructive',
       });
     }
   };
@@ -81,7 +84,9 @@ function RegisterPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
+        // className="w-full max-w-md"
+        className="w-full max-w-xl"    // 36rem (~576px)
+      // className="w-full sm:max-w-xl md:max-w-2xl"
       >
         <Card className="border-0 shadow-lg backdrop-blur-xl bg-white/70 dark:bg-navy/70">
           <CardHeader className="space-y-1 text-center">
@@ -103,14 +108,17 @@ function RegisterPage() {
 
           <CardContent className="space-y-4">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+              {/* <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4"> */}
+              <form onSubmit={form.handleSubmit(handleSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
                 {/* Name Field */}
                 <FormField
                   control={form.control}
                   name="name"
                   rules={{ required: "Full name is required" }}
                   render={({ field }) => (
-                    <FormItem>
+                    // In each <FormItem>, add: className="w-full"
+                    <FormItem className="w-full">
                       <FormLabel>Full Name</FormLabel>
                       <FormControl>
                         <Input
@@ -136,7 +144,7 @@ function RegisterPage() {
                     }
                   }}
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="w-full">
                       <FormLabel>Email</FormLabel>
                       <FormControl>
                         <Input
@@ -154,7 +162,7 @@ function RegisterPage() {
                 <FormField
                   control={form.control}
                   name="password"
-                  rules={{ 
+                  rules={{
                     required: "Password is required",
                     minLength: {
                       value: 6,
@@ -162,7 +170,7 @@ function RegisterPage() {
                     }
                   }}
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="w-full">
                       <FormLabel>Password</FormLabel>
                       <FormControl>
                         <div className="relative">
@@ -190,7 +198,7 @@ function RegisterPage() {
                 <FormField
                   control={form.control}
                   name="phone"
-                  rules={{ 
+                  rules={{
                     required: "Phone number is required",
                     pattern: {
                       value: /^[0-9]{10}$/,
@@ -198,7 +206,7 @@ function RegisterPage() {
                     }
                   }}
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="w-full">
                       <FormLabel>Phone Number</FormLabel>
                       <FormControl>
                         <Input
@@ -218,7 +226,7 @@ function RegisterPage() {
                   name="address"
                   rules={{ required: "Address is required" }}
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="w-full">
                       <FormLabel>Address</FormLabel>
                       <FormControl>
                         <Input
@@ -238,7 +246,7 @@ function RegisterPage() {
                   name="answer"
                   rules={{ required: "Security answer is required" }}
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="w-full">
                       <FormLabel>Security Question Answer</FormLabel>
                       <FormControl>
                         <Input
@@ -252,9 +260,11 @@ function RegisterPage() {
                   )}
                 />
 
-                <Button 
-                  type="submit" 
-                  className="w-full bg-black text-white hover:bg-black transition-colors"
+                <Button
+                  type="submit"
+                  // className="w-full bg-black text-white hover:bg-black transition-colors"
+                  // className="w-full col-span-1 md:col-span-2 bg-black text-white hover:bg-black transition-colors"
+                  className="w-full col-span-1 md:col-span-2"
                   disabled={isLoading}
                 >
                   {isLoading ? 'Creating Account...' : (
@@ -269,9 +279,11 @@ function RegisterPage() {
           </CardContent>
 
           <CardFooter className="flex flex-col gap-4">
-            <div className="text-center text-sm text-gray-500">
+            <div className="text-center text-sm text-gray-500 font-bold">
               Already have an account?{" "}
-              <Link to="/api/v1/auth/login" className="text-black hover:underline font-bold">
+              {/* <Link to="/api/v1/auth/login" className="text-black hover:underline font-bold"> */}
+              {/* <Link to="/login" className="text-black hover:underline font-bold"> */}
+              <Link to="/login" className="text-coral hover:underline font-bold">
                 Sign in
               </Link>
             </div>

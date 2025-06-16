@@ -12,8 +12,9 @@ import FoodItemParentComponent from "../../components/admin/FoodItemParentCompon
 import { useFoodStore } from "../../store/useFoodStore";
 import CategoriesTabMenu from "../../components/admin/CategoriesTabMenu";
 import TagsTabMenu from "../../components/admin/TagsTabMenu";
-import useCategoryStore from "@/store/useCategoryStore";
-import { useTagStore } from "@/store/useTagStore";
+import useCategoryStore from "../../store/useCategoryStore";
+// import { useTagStore } from "../../store/useTagStore";
+import useTagStore from "../../store/useTagStore";
 
 const MenuManagement = () => {
   const [activeTab, setActiveTab] = useState("menuItems");

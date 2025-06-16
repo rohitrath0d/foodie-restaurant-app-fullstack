@@ -76,7 +76,7 @@ const AdminLayout = () => {
 
   const navItems = [
     { path: "/admin/restaurant-management", label: "Manage Restaurants", icon: HandPlatter },
-    { path: "/admin/menu", label: "Manage Menu", icon: BookOpen },
+    { path: "/admin/menu-management", label: "Manage Menu", icon: BookOpen },
     { path: "/admin/orders", label: "Orders", icon: ClipboardList },
     { path: "/admin/settings", label: "Settings", icon: Settings },
     { path: "/admin/dashboard", label: "Dashboard", icon: Home },
@@ -100,7 +100,7 @@ const AdminLayout = () => {
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
-      <aside className="w-64 bg-white shadow-md hidden md:block">
+      <aside className="relative w-64 bg-white shadow-md hidden md:block">
         <div className="p-6">
           <h2 className="text-2xl font-bold text-restaurant-softRed">Foodie Admin</h2>
         </div>
@@ -122,7 +122,8 @@ const AdminLayout = () => {
             </Link>
           ))}
         </nav>
-        <div className="absolute bottom-0 left-0 right-0 p-6">
+        {/* <div className="absolute bottom-0 left-0 right-0 p-6"> */}
+        <div className="absolute bottom-0 p-6 w-full">
           <div className="flex items-center mb-4">
             {/* <img src={mockAdmin.avatar} alt="Admin" className="w-10 h-10 rounded-full mr-3" /> */}
             <img src={user.avatar || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"} alt="Admin" className="w-10 h-10 rounded-full mr-3" />
@@ -135,10 +136,12 @@ const AdminLayout = () => {
           </div>
           <Button
             variant="outline"
-            className="w-full flex items-center justify-center text-gray-600"
+            className="w-full flex items-center justify-center text-white  bg-coral"
             onClick={handleLogout}
           >
-            <LogOut size={16} className="mr-2" />
+            <LogOut 
+              size={16} 
+              className="mr-2" />
             <span>Logout</span>
           </Button>
         </div>

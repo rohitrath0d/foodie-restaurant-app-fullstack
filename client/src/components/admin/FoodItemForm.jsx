@@ -7,16 +7,22 @@ import { Textarea } from "../..//components/ui/textarea";
 import { Switch } from "../../components/ui/switch";
 import { useFoodStore } from "../../store/useFoodStore";
 import { Card, CardContent } from "../../components/ui/card";
+import PropTypes from 'prop-types';
 
 
-const FoodItemForm = ({ food, onSuccess, onCancel, categories, tags, restaurantId }) => {     // prop destructuring mai we have to add {} in the props used.
+const FoodItemForm = ({
+  food,
+  onSuccess,
+  onCancel,
+  categories = [],    // This comes from props
+  tags = [],          // This comes from props
+  restaurantId
+}) => {     // prop destructuring mai we have to add {} in the props used.
+
   const { createFood, updateFood, isLoading, error } = useFoodStore();
 
+  // const [categories, setCategories] = useState([]);
   const [selectedTags, setSelectedTags] = useState([]);
-
-  // const [category, setCategory] = useState([]); // ✅ not undefined
-
-
 
   const [editedItem, setEditedItem] = useState({
     title: "",
@@ -27,7 +33,7 @@ const FoodItemForm = ({ food, onSuccess, onCancel, categories, tags, restaurantI
     category: "",
     code: "",
     isAvailable: false,
-    restaurant: restaurantId || "",
+    restaurant: restaurantId,
     rating: 0,
 
     // check if this fields exists on schema.
@@ -52,6 +58,7 @@ const FoodItemForm = ({ food, onSuccess, onCancel, categories, tags, restaurantI
   // })
 
 
+
   // Initialize form with foodItem data if provided (for editing)
   useEffect(() => {
     if (food) {
@@ -68,7 +75,7 @@ const FoodItemForm = ({ food, onSuccess, onCancel, categories, tags, restaurantI
         // rating: foodItem.rating || 0,
 
         ...food,
-        restaurant: food.restaurant || restaurantId || "",
+        restaurant: food.restaurant || restaurantId,
         hasCoupon: !!food.couponCode || '',              // make this available in schema design
         couponCode: food.couponCode || "",
         couponDiscount: food.couponDiscount || 0,
@@ -76,7 +83,13 @@ const FoodItemForm = ({ food, onSuccess, onCancel, categories, tags, restaurantI
 
       // const tagIds = food.foodTags?.map(tag => tag.id) || [];
       // setSelectedTags(tagIds);
-      setSelectedTags(food.foodTags?.map(tag => tag.id) || []);
+      // setSelectedTags(food.foodTags?.map(tag => tag.id) || []);
+
+      // Safely handle foodTags initialization
+      const initialTags = Array.isArray(food.foodTags)
+        ? food.foodTags.map(tag => tag.id || tag._id)
+        : [];
+      setSelectedTags(initialTags);
 
     } else {
       // Create mode - reset to defaults
@@ -89,7 +102,7 @@ const FoodItemForm = ({ food, onSuccess, onCancel, categories, tags, restaurantI
         category: "",
         code: "",
         isAvailable: false,
-        restaurant: restaurantId || "",
+        restaurant: restaurantId,
         rating: 0,
         hasCoupon: false,
         couponCode: "",
@@ -100,6 +113,12 @@ const FoodItemForm = ({ food, onSuccess, onCancel, categories, tags, restaurantI
     }
   }, [food, restaurantId]);                                                     // missing dependency on restaurantId added.
 
+
+  // In FoodItemForm.jsx
+  useEffect(() => {
+    console.log('Form Categories:', categories);
+    console.log('Form Tags:', tags);
+  }, [categories, tags]);
 
   // const [selectedTags, setSelectedTags] = useState(
   //   foods ? foods.foodTags.map((tag) => tag.id) : []
@@ -143,27 +162,40 @@ const FoodItemForm = ({ food, onSuccess, onCancel, categories, tags, restaurantI
     }));
   };
 
+
   // Fix the TypeScript error by creating a specific handler for select elements
   const handleCategoryChange = (e) => {
     const { value } = e.target;
     // setEditedItem({ ...editedItem, categoryId: value });
-    setEditedItem((prev) => ({ ...prev, category: value }));
-
+    setEditedItem((prev) =>
+    ({
+      ...prev,
+      category: value
+    }));
   };
 
+  // Update the tags rendering to handle missing tags
   const handleTagToggle = (tagId) => {
+
+    if (!tagId) return;
+
     const newSelectedTags = selectedTags.includes(tagId)
       ? selectedTags.filter((id) => id !== tagId)
       : [...selectedTags, tagId];
 
     setSelectedTags(newSelectedTags);
 
-    const selectedTagObjects = tags.filter((tag) => newSelectedTags.includes(tag.id)
-    );
+    // Safely filter tags
+    const validTags = Array.isArray(tags) ? tags : [];
+    setEditedItem(prev => ({
+      ...prev,
+      foodTags: validTags.filter(tag => newSelectedTags.includes(tag._id || tag.id))
+    }));
 
+    // const selectedTagObjects = tags.filter((tag) => newSelectedTags.includes(tag.id)
+    // );
     // setEditedItem({ ...editedItem, foodTags: selectedTagObjects });
-    setEditedItem((prev) => ({ ...prev, foodTags: selectedTagObjects }));
-
+    // setEditedItem((prev) => ({ ...prev, foodTags: selectedTagObjects }));
   };
 
   const handleSubmit = async (e) => {
@@ -227,179 +259,200 @@ const FoodItemForm = ({ food, onSuccess, onCancel, categories, tags, restaurantI
 
   return (
     // <Card className="w-full max-w-3xl mx-auto">
-      // <CardContent className="pt-10 pb-10 px-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
+    // <CardContent className="pt-10 pb-10 px-6">
+    <form onSubmit={handleSubmit} className="space-y-6">
 
+      <div>
+        <label htmlFor="title" className="block text-sm font-medium mb-1">
+          Item Name
+        </label>
+        <Input
+          id="title"
+          name="title"
+          value={editedItem.title || ''}
+          onChange={handleChange}
+          required
+        />
+      </div>
+
+      {/* <div className="grid grid-cols-2 gap-4"> */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="price" className="block text-sm font-medium mb-1">
+            {/* Price ($) */}
+            Price (₹)
+          </label>
+          <Input
+            id="price"
+            name="price"
+            type="number"
+            step="0.01"
+            value={editedItem.price}
+            onChange={handleNumberChange}
+            required
+          />
+        </div>
+
+        <div>
+          <label htmlFor="category" className="block text-sm font-medium mb-1">
+            Category
+          </label>
+          <select
+            id="category"
+            name="category"
+            value={typeof editedItem.category === 'object'
+              ? editedItem.category?._id
+              : editedItem.category || ''}       //  Changed from categoryId
+            onChange={handleCategoryChange}
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            required
+          >
+            <option value="">Select a category</option>
+            {
+              // Array.isArray(categories) &&
+              categories && categories.map((category) => {
+                const categoryId = category._id || category.id;
+                const categoryName = category.name || category.title;
+                // <option
+                //   key={category._id || category.id}
+                //   value={category._id || category.id}>
+                //   {category.name || category.title}
+                // </option>
+                return (
+                  <option key={categoryId} value={categoryId}>
+                    {categoryName}
+                  </option>
+                );
+              })};
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label htmlFor="description" className="block text-sm font-medium mb-1">
+          Description
+        </label>
+        <Textarea
+          id="description"
+          name="description"
+          value={editedItem.description}
+          onChange={handleChange}
+          rows={3}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="image" className="block text-sm font-medium mb-1">
+          Image URL
+        </label>
+        <Input
+          id="imageUrl"
+          name="imageUrl"
+          value={editedItem.imageUrl || ''}
+          onChange={handleChange}
+        />
+      </div>
+
+      {/* <div className="grid grid-cols-2 gap-4"> */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="isAvailable"
+            checked={editedItem.isAvailable}
+            onCheckedChange={handleAvailabilityChange}
+          />
+          <label htmlFor="isAvailable" className="text-sm font-medium">
+            Available
+          </label>
+        </div>
+
+        {/* check whether the id and name exists on the schema */}
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="hasCoupon"
+            checked={editedItem.hasCoupon}
+            onCheckedChange={handleCouponChange}
+          />
+          <label htmlFor="hasCoupon" className="text-sm font-medium">
+            Has Coupon
+          </label>
+        </div>
+      </div>
+
+      {editedItem.hasCoupon && (
+        // <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="title" className="block text-sm font-medium mb-1">
-              Item Name
+            <label htmlFor="couponCode" className="block text-sm font-medium mb-1">
+              Coupon Code
             </label>
             <Input
-              id="title"
-              name="title"
-              value={editedItem.title || ''}
+              id="couponCode"
+              name="couponCode"
+              value={editedItem.couponCode}
               onChange={handleChange}
-              required
             />
           </div>
+          <div>
+            <label htmlFor="couponDiscount" className="block text-sm font-medium mb-1">
+              Discount (%)
+            </label>
+            <Input
+              id="couponDiscount"
+              name="couponDiscount"
+              type="number"
+              min="0"
+              max="100"
+              value={editedItem.couponDiscount}
+              onChange={handleNumberChange}
+            />
+          </div>
+        </div>
+      )}
 
-          {/* <div className="grid grid-cols-2 gap-4"> */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="price" className="block text-sm font-medium mb-1">
-                {/* Price ($) */}
-                Price (₹)
-              </label>
-              <Input
-                id="price"
-                name="price"
-                type="number"
-                step="0.01"
-                value={editedItem.price}
-                onChange={handleNumberChange}
-                required
-              />
-            </div>
-
-            <div>
-              <label htmlFor="category" className="block text-sm font-medium mb-1">
-                Category
-              </label>
-              <select
-                id="category"
-                name="category"
-                value={editedItem.category}       //  Changed from categoryId
-                onChange={handleCategoryChange}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                required
+      {/* // And the tags section: */}
+      <div>
+        <label className="block text-sm font-medium mb-2">Tags</label>
+        <div className="flex flex-wrap gap-2">
+          {/* {(tags || []).map((tag) => ( */}
+          {/* {tags.map((tag) => ( */}
+          {/* {(tags || []).map((tag) => ( */}
+          {tags && tags.map((tag) => {
+            const tagId = tag._id || tag.id;
+            const isSelected = selectedTags.includes(tagId);
+            return (
+              <div
+                key={tagId}
+                className={`text-xs px-3 py-1 rounded-full cursor-pointer border transition ${isSelected
+                  ? `bg-${tag.color}-500 text-white`
+                  : "bg-gray-100 text-gray-700"
+                  }`}
+                style={
+                  // selectedTags.includes(tag._id || tag.id)
+                  isSelected
+                    ? { backgroundColor: tag.color }
+                    : undefined
+                }
+                onClick={() => handleTagToggle(tagId)}
               >
-                <option value="">Select a category</option>
-                {Array.isArray(categories) &&
-                  categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label htmlFor="description" className="block text-sm font-medium mb-1">
-              Description
-            </label>
-            <Textarea
-              id="description"
-              name="description"
-              value={editedItem.description}
-              onChange={handleChange}
-              rows={3}
-            />
-          </div>
-
-          <div>
-            <label htmlFor="image" className="block text-sm font-medium mb-1">
-              Image URL
-            </label>
-            <Input
-              id="imageUrl"
-              name="imageUrl"
-              value={editedItem.imageUrl || ''}
-              onChange={handleChange}
-            />
-          </div>
-
-          {/* <div className="grid grid-cols-2 gap-4"> */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="isAvailable"
-                checked={editedItem.isAvailable}
-                onCheckedChange={handleAvailabilityChange}
-              />
-              <label htmlFor="isAvailable" className="text-sm font-medium">
-                Available
-              </label>
-            </div>
-
-            {/* check whether the id and name exists on the schema */}
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="hasCoupon"
-                checked={editedItem.hasCoupon}
-                onCheckedChange={handleCouponChange}
-              />
-              <label htmlFor="hasCoupon" className="text-sm font-medium">
-                Has Coupon
-              </label>
-            </div>
-          </div>
-
-          {editedItem.hasCoupon && (
-            // <div className="grid grid-cols-2 gap-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="couponCode" className="block text-sm font-medium mb-1">
-                  Coupon Code
-                </label>
-                <Input
-                  id="couponCode"
-                  name="couponCode"
-                  value={editedItem.couponCode}
-                  onChange={handleChange}
-                />
+                {tag.name}
               </div>
-              <div>
-                <label htmlFor="couponDiscount" className="block text-sm font-medium mb-1">
-                  Discount (%)
-                </label>
-                <Input
-                  id="couponDiscount"
-                  name="couponDiscount"
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={editedItem.couponDiscount}
-                  onChange={handleNumberChange}
-                />
-              </div>
-            </div>
-          )}
+              );
+            })};
+        </div>
+      </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-2">Tags</label>
-            <div className="flex flex-wrap gap-2">
-              {(tags || []).map((tag) => (
-                <div
-                  key={tag.id}
-                  className={`text-xs px-3 py-1 rounded-full cursor-pointer border transition ${selectedTags.includes(tag.id)
-                    ? `bg-${tag.color} text-white`
-                    : "bg-gray-100 text-gray-700"
-                    }`}
-                  style={
-                    selectedTags.includes(tag.id)
-                      ? { backgroundColor: tag.color }
-                      : undefined
-                  }
-                  onClick={() => handleTagToggle(tag.id)}
-                >
-                  {tag.name}
-                </div>
-              ))};
-            </div>
-          </div>
-
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button variant="outline" type="button" onClick={onCancel}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isLoading}>
-              {/* Save Changes */}
-              {isLoading ? "Saving..." : "Save changes"}
-            </Button>
-          </div>
-        </form>
-      // </CardContent>
+      <div className="flex justify-end space-x-2 pt-4">
+        <Button variant="outline" type="button" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button type="submit" disabled={isLoading}>
+          {/* Save Changes */}
+          {isLoading ? "Saving..." : "Save changes"}
+        </Button>
+      </div>
+    </form>
+    // </CardContent>
     // </Card>
   );
 
@@ -419,4 +472,16 @@ const FoodItemForm = ({ food, onSuccess, onCancel, categories, tags, restaurantI
   //   </div>
   // );
 };
+
+
+
+FoodItemForm.propTypes = {
+  food: PropTypes.object,
+  onSuccess: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired,
+  categories: PropTypes.array,
+  tags: PropTypes.array,
+  restaurantId: PropTypes.string
+};
+
 export default FoodItemForm;

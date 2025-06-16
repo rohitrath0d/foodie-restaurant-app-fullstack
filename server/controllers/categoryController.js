@@ -58,8 +58,8 @@ const getAllCategoryCategory = async (req, res) => {
     res.status(200).send({
       success: true,
       totalCategory: categories.length,
-      categories
-    })
+      categories       // This should be an array
+    });
 
   } catch (error) {
     console.log(error);

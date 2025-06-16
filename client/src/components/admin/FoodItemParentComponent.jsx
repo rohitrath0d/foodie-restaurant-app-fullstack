@@ -1,13 +1,17 @@
-/* eslint-disable no-undef */
 import { useState } from "react";
 import { useFoodStore } from "../../store/useFoodStore";
 import FoodItemCard from "./FoodItemCard";
 import FoodItemForm from "./FoodItemForm";
 import { Button } from "../ui/button";
 import { Plus } from "lucide-react";
-import { Dialog, DialogContent, DialogTitle } from "../ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { useEffect } from "react";
-
+import axios from 'axios';
+import { toast } from "sonner";
+import { API_ROUTES } from "@/utils/api";
+// import { API_ROUTES } from "@/utils/api";
+// import categoryAxios from '../../store/useCategoryStore'
+// import tagsAxios from '../../store/useTagStore'
 
 
 // ✅ GOAL:
@@ -19,11 +23,17 @@ import { useEffect } from "react";
 // Render the form conditionally (either for creation or editing)
 // Pass the selected restaurant to the form via props
 
-const FoodItemParentComponent = () => {
+const FoodItemParentComponent = ({ restaurantId }) => {   // Add restaurantId as prop
+
   const { food, getAllFood, deleteFood } = useFoodStore();
+  const [categories, setCategories] = useState([]);
+  const [tags, setTags] = useState([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   // const [editingRestaurant, setEditingRestaurant] = useState(null);
   const [editingFood, setEditingFood] = useState(null);
+
+  const [isLoadingCategories, setIsLoadingCategories] = useState(false);
+  const [isLoadingTags, setIsLoadingTags] = useState(false);
 
   // Refresh restaurant list
   // const refreshRestaurants = async () => {
@@ -36,14 +46,61 @@ const FoodItemParentComponent = () => {
     // setEditingRestaurant(food);                        // --> This is for restaurant, hence commented out.       
     setEditingFood(food);
     setIsFormOpen(true);
+
+    toast.success("Edit Mode Activated", {
+      description: `Preparing to edit ${food.title}`,
+    });
   };
 
+  // useEffect(() => {
+  //   // getAllRestaurants();
+  //   getAllFood();
+  // // }, [getAllRestaurants]);
+  // }, [getAllFood]);
+
+  // Fetch categories and tags when component mounts
   useEffect(() => {
-    // getAllRestaurants();
-    getAllFood();
-  // }, [getAllRestaurants]);
+    const fetchData = async () => {
+      setIsLoadingCategories(true);
+      setIsLoadingTags(true);
+      try {
+        await getAllFood();
+        // Add these API calls to fetch categories and tags
+        // const catResponse = await axios.get('/api/v1/categories');
+        // const tagsResponse = await axios.get('/api/v1/tags');
+        // setCategories(catResponse.data);
+        // setTags(tagsResponse.data);
+
+        const [catResponse, tagsResponse] = await Promise.all([
+          // axios.get('/api/v1/category'),
+          axios.get(`${API_ROUTES.CATEGORY}/getAllCategory`),
+          // categoryAxios.get(`${API_ROUTES.CATEGORY}`),
+          // axios.get('/api/v1/tags')
+          axios.get(`${API_ROUTES.TAGS}/getAllTags`)
+          // tagsAxios.get(`${API_ROUTES.TAGS}`)
+        ]);
+
+        // console.log('Category API Response:', catResponse.data);
+        console.log('Tags API Response:', tagsResponse.data);
+
+        // Ensure you're extracting the correct data
+        setCategories(catResponse.data.categories || []);
+        setTags(tagsResponse.data.tags || []);
+
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setIsLoadingCategories(false);
+        setIsLoadingTags(false);
+      }
+    };
+    fetchData();
   }, [getAllFood]);
 
+  useEffect(() => {
+    console.log('Categories:', categories);
+    console.log('Tags:', tags);
+  }, [categories, tags]);
 
   // // Handle form submission (both create and update)
   const handleFormSubmit = async () => {
@@ -86,8 +143,8 @@ const FoodItemParentComponent = () => {
             key={food.id}
             food={food}             // Pass the current item
             onEdit={() => handleEditInit(food)}                             // edit restaurant through card
-            onDelete={() => handleDelete(food.id)}              // delete restaurant through card
-            // onSuccess={handleFormSubmit} // handle form submission
+            onDelete={() => handleDelete(food.id)}                          // delete restaurant through card
+          // onSuccess={handleFormSubmit} // handle form submission
           />
         ))}
       </div>
@@ -116,10 +173,16 @@ const FoodItemParentComponent = () => {
         setIsFormOpen(open);
       }}>
         <DialogContent className="sm:max-w-[625px]">
-        <DialogTitle>{editingFood ? "Edit Food Item" : "Add Food Item"}</DialogTitle>
+          <DialogHeader>
+            <DialogTitle>
+              {editingFood ? "Edit Food Item" : "Add Food Item"}
+            </DialogTitle>
+          </DialogHeader>
+
+          {/* Only render FoodItemForm -- no need of rendering FoodItemCard*/}
 
           {/* <RestaurantForm */}
-          <FoodItemCard
+          {/* <FoodItemCard
             food={editingFood}
             // onSuccess={() => {
             //   refreshFoods();         // re-fetch from backend
@@ -129,22 +192,32 @@ const FoodItemParentComponent = () => {
             onCancel={() => {
               setIsFormOpen(false)
               setEditingFood(null);
-                
+
             }}
 
             categories={[]}  // Pass actual categories from your store
             tags={[]}        // Pass actual tags from your store
             restaurantId={""} // Pass actual restaurantId
-          />
+          /> */}
 
-          <FoodItemForm 
-              food = {isFormOpen ? editingFood : null} // Pass the current food item if editing, else null
-              onSuccess={handleFormSubmit} // handle form submission
-              onCancel={() => {
-                setIsFormOpen(false);
-                setEditingFood(null);
-              }}
-            />
+          <FoodItemForm
+            food={editingFood}
+            onSuccess={handleFormSubmit}     // handle form submission
+            onCancel={() => {
+              setIsFormOpen(false);
+              setEditingFood(null);
+
+              // categories = { categories }
+              // tags = { tags }
+              // restaurantId = { restaurantId } // Pass the actual restaurant ID
+            }}
+            categories={categories}
+            tags={tags}
+            restaurantId={restaurantId} // Pass the actual restaurant ID
+
+            isLoadingCategories={isLoadingCategories}
+            isLoadingTags={isLoadingTags}
+          />
         </DialogContent>
       </Dialog>
     </div>

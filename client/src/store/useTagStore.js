@@ -4,14 +4,33 @@ import { API_ROUTES } from '../utils/api';
 import axios from 'axios';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import useAuthStore from './useAuthStore';
+
+// // Axios instance setup
+// const axiosInstance = axios.create({
+//   baseURL: API_ROUTES.TAGS,
+//   withCredentials: true,
+// });
+
 
 // Axios instance setup
-const axiosInstance = axios.create({
+const tagAxios = axios.create({
   baseURL: API_ROUTES.TAGS,
   withCredentials: true,
 });
 
-export const useTagStore = create(
+
+// Add auth interceptor to inject token
+tagAxios.interceptors.request.use((config) => {
+  const token = useAuthStore.getState().token;
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+
+const useTagStore = create(
   persist(
     (set, get) => ({
       // user: null,
@@ -22,16 +41,17 @@ export const useTagStore = create(
       // createTag: async (name, color, isGlobal) => {
       // createTag: async (name, color) => {
       createTag: async (tag) => {                    //  Refactor createTag to accept a tag object
-         const { name, color } = tag;
+        const { name, color } = tag;
         set({ isLoading: true, error: null });
         try {
-          const response = await axiosInstance.post(`${API_ROUTES.TAGS}/createTag`,
-             {
-            name,
-            color,
-            // isGlobal,
-          }
-        );
+          // const response = await axiosInstance.post(`${API_ROUTES.TAGS}/createTag`,
+          const response = await tagAxios.post(`/createTag`,
+            {
+              name,
+              color,
+              // isGlobal,
+            }
+          );
           // set((state) => ({
           //   tags: [...state.tags, response.data.tag],
           //   isLoading: false,
@@ -48,7 +68,9 @@ export const useTagStore = create(
       getAllTags: async () => {
         set({ isLoading: true, error: null });
         try {
-          const response = await axiosInstance.get(`${API_ROUTES.TAGS}/getAllTags`);
+          // const response = await axiosInstance.get(`${API_ROUTES.TAGS}/getAllTags`);
+          const response = await tagAxios.get(`/getAllTags`);
+          console.log('TagResponse', response);
           set({ tags: response.data.tags, isLoading: false });
         } catch (error) {
           set({ isLoading: false, error: error.response?.data?.message || 'Error fetching tags' });
@@ -59,7 +81,8 @@ export const useTagStore = create(
       getTagById: async (id) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await axiosInstance.get(`${API_ROUTES.TAGS}/getTagById/${id}`);
+          // const response = await axiosInstance.get(`${API_ROUTES.TAGS}/getTagById/${id}`);
+          const response = await tagAxios.get(`/getTagById/${id}`);
           // set({ tags: response.data.tags, isLoading: false });      // --> 1. getTagById is overwriting the entire tags list. If you're fetching one tag by ID, then this is wrong — you're updating the entire list with just one. It should be:           return response.data.tag;
           set({ isLoading: false });
           return response.data.tag;
@@ -72,7 +95,8 @@ export const useTagStore = create(
       updateTag: async (id, { name, color }) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await axiosInstance.put(`${API_ROUTES.TAGS}/updateTag/${id}`, {
+          // const response = await axiosInstance.put(`${API_ROUTES.TAGS}/updateTag/${id}`, {
+          const response = await tagAxios.put(`/updateTag/${id}`, {
             name,
             color,
             // isGlobal,
@@ -89,7 +113,8 @@ export const useTagStore = create(
       deleteTag: async (id) => {
         set({ isLoading: true, error: null });
         try {
-          await axiosInstance.delete(`${API_ROUTES.TAGS}/deleteTag/${id}`);
+          // await axiosInstance.delete(`${API_ROUTES.TAGS}/deleteTag/${id}`);
+          await tagAxios.delete(`/deleteTag/${id}`);
           set((state) => ({
             tags: state.tags.filter((tag) => tag.id !== id),
             isLoading: false,
@@ -100,5 +125,15 @@ export const useTagStore = create(
         }
         return false;
       },
-    }))
+    }),
+     {
+      name: 'tag-storage',
+      partialize: (state) => ({
+        // user: state.user,
+        tags: state.tags,
+      }),
+    }
+  )
 );
+
+export default useTagStore;

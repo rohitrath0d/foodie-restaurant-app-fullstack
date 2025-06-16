@@ -3,12 +3,29 @@ import { API_ROUTES } from '../utils/api';
 import axios from 'axios';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import useAuthStore from './useAuthStore';
+
+// const foodAxios = axios.create({
+//   baseURL: API_ROUTES.FOOD,
+//   withCredentials: true,
+// });
 
 // Axios instance setup
-const axiosInstance = axios.create({
+const restaurantAxios = axios.create({
   baseURL: API_ROUTES.RESTAURANT,
   withCredentials: true,
 });
+
+
+// Add auth interceptor to inject token
+restaurantAxios.interceptors.request.use((config) => {
+  const token = useAuthStore.getState().token;
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 
 export const useRestaurantStore = create(
   persist(
@@ -24,45 +41,57 @@ export const useRestaurantStore = create(
       error: null,
       restaurants: [],        // restaurant []
 
-      createRestaurant: async (
-        title,
-        imageUrl,
-        foods,
-        time,
-        pickup,
-        delivery,
-        isOpen,
-        logoUrl,
-        rating,
-        ratingCount,
-        code,
-        coords,) => {
+      // createRestaurant: async (
+      //   title,
+      //   imageUrl,
+      //   foods,
+      //   time,
+      //   pickup,
+      //   delivery,
+      //   isOpen,
+      //   logoUrl,
+      //   rating,
+      //   ratingCount,
+      //   code,
+      //   coords,) => {
+      createRestaurant: async (restaurantData) => {
+
         set({ isLoading: true, error: null });
         try {
-          const response = await axiosInstance.post(`${API_ROUTES.RESTAURANT}/createRestaurant`, {
-            title,
-            imageUrl,
-            foods,
-            time,
-            pickup,
-            delivery,
-            isOpen,
-            logoUrl,
-            rating,
-            ratingCount,
-            code,
-            coords,
-          });
-          set({ isLoading: false });
+          // const response = await restaurantAxios.post(`${API_ROUTES.RESTAURANT}/createRestaurant`, {
+          // const response = await restaurantAxios.post(`/createRestaurant`, {
+          //   title,
+          //   imageUrl,
+          //   foods,
+          //   time,
+          //   pickup,
+          //   delivery,
+          //   isOpen,
+          //   logoUrl,
+          //   rating,
+          //   ratingCount,
+          //   code,
+          //   coords,
+          // });
+          const response = await restaurantAxios.post('/createRestaurant', restaurantData);
+          // set({ isLoading: false });
+
+          // Optionally add to local state immediately (optimistic update)
+          set((state) => ({
+            restaurants: [...state.restaurants, response.data.newRestaurant],
+            isLoading: false
+          }));
           return response.data.newRestaurant;
+
         } catch (error) {
           set({
             isLoading: false,
             error: axios.isAxiosError(error)
-              ? error?.response?.data?.error || 'Restaurant creation failed'
+              ? error?.response?.data?.message || 'Restaurant creation failed'
               : 'Restaurant creation failed',
           });
-          return null;
+          // return null;
+          throw error; // Important to re-throw for form handling
         }
       },
 
@@ -77,11 +106,16 @@ export const useRestaurantStore = create(
         // get({ isLoading: true, error: null });
         set({ isLoading: true, error: null });         // ✅ setting loading state
         try {
-          const response = await axiosInstance.get(`${API_ROUTES.RESTAURANT}/getAllRestaurants`);
-          console.log('GetAllRestaurants', response);
+          // const response = await restaurantAxios.get(`${API_ROUTES.RESTAURANT}/getAllRestaurants`);
+          const response = await restaurantAxios.get(`/getAllRestaurants`);
+          console.log('GetAllRestaurants', response.data);       // Verify _id exists
           // get({ isLoading: false, restaurants: response.data.restaurants });
-          set({ isLoading: false, restaurants: response.data.restaurants });         // ✅ updating state   --> coz, we have to update the state everytime, when new restaurant comes in.
-          return true;
+          set({
+            isLoading: false,
+            restaurants: response.data.restaurants
+          });         // ✅ updating state   --> coz, we have to update the state everytime, when new restaurant comes in.
+          // return true;
+          return response.data.restaurants;
         } catch (error) {
           get({
             isLoading: false,
@@ -89,14 +123,17 @@ export const useRestaurantStore = create(
               ? error?.response?.data?.error || 'No Restaurant available'
               : 'No Restaurant available',
           });
-          return false;
+          // return false;
+          // throw error;
+          return [];
         }
       },
 
       getRestaurantById: async (id) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await axiosInstance.get(`${API_ROUTES.RESTAURANT}/getRestaurantById/${id}`);
+          // const response = await restaurantAxios.get(`${API_ROUTES.RESTAURANT}/getRestaurantById/${id}`);
+          const response = await restaurantAxios.get(`/getRestaurantById/${id}`);
           set({ isLoading: false });
           return response.data.restaurant; // return the restaurant to use in frontend
         } catch (error) {
@@ -121,43 +158,65 @@ export const useRestaurantStore = create(
       // },
 
 
+
+      // Either change frontend:
+      // await restaurantAxios.put(`/updateRestaurantById/${restaurantId}`, ...);
+      // Or change backend route:
+      // router.put("/update/:id", ...);
+
+      // MongoDB uses _id by default for document identifiers
+      // Your backend controller expects to receive this _id in the URL parameter
+      // The mismatch in property names (restaurantId vs _id) was causing the ID to be undefined during updates
+      // With no ID, your backend likely treats it as a create operation
+
       updateRestaurant: async (
         id,
-        {
-          title,
-          imageUrl,
-          foods,
-          time,
-          pickup,
-          delivery,
-          isOpen,
-          logoUrl,
-          rating,
-          ratingCount,
-          code,
-          coords,
-        }
+        // restaurantId,
+        // {
+        //   title,
+        //   imageUrl,
+        //   foods,
+        //   time,
+        //   pickup,
+        //   delivery,
+        //   isOpen,
+        //   logoUrl,
+        //   rating,
+        //   ratingCount,
+        //   code,
+        //   coords,
+        // }
+        data
       ) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await axiosInstance.put(
-            `${API_ROUTES.RESTAURANT}/update/${id}`,
-            {
-              title,
-              imageUrl,
-              foods,
-              time,
-              pickup,
-              delivery,
-              isOpen,
-              logoUrl,
-              rating,
-              ratingCount,
-              code,
-              coords,
-            }
-          );
+          // Convert string 'true'/'false' to boolean
+          const payload = {
+            ...data,
+            delivery: data.delivery === 'true' || data.delivery === true,
+            pickup: data.pickup === 'true' || data.pickup === true
+          };
 
+          const response = await restaurantAxios.put(
+            // `${API_ROUTES.RESTAURANT}/update/${id}`,
+            `/updateRestaurantById/${id}`,      // i am calling update, but on the backend it is called updateRestaurantById
+            // `/update/${restaurantId}`,
+            // {
+            //   title,
+            //   imageUrl,
+            //   foods,
+            //   time,
+            //   pickup,
+            //   delivery,
+            //   isOpen,
+            //   logoUrl,
+            //   rating,
+            //   ratingCount,
+            //   code,
+            //   coords,
+            // }
+            payload   // Pass the complete data object, no need to destructure it completely.
+          );
           set({ isLoading: false });
 
           return response.data.updatedRestaurant; // 🟢 use this in your UI after update
@@ -168,14 +227,24 @@ export const useRestaurantStore = create(
               ? error?.response?.data?.error || 'Failed to update restaurant'
               : 'Failed to update restaurant',
           });
-          return null;
+          // return null;
+          throw error  // Re-throw for component handling
         }
       },
 
-      deleteRestaurantById: async (id) => {
+      deleteRestaurantById: async (
+        id,
+        // restaurantId,
+      ) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await axiosInstance.delete(`${API_ROUTES.RESTAURANT}/deleteRestaurantById/${id}`);
+          if (!id) {
+            throw new Error("No restaurant ID provided");
+          }
+
+          // const response = await restaurantAxios.delete(`${API_ROUTES.RESTAURANT}/deleteRestaurantById/${id}`);
+          const response = await restaurantAxios.delete(`/deleteRestaurantById/${id}`);
+          // const response = await restaurantAxios.delete(`/deleteRestaurantById/${restaurantId}`);
           set({ isLoading: false });
           return response.data.restaurant; // optionally return deleted data
 
@@ -183,19 +252,20 @@ export const useRestaurantStore = create(
           set({
             isLoading: false,
             error: axios.isAxiosError(error)
-              ? error?.response?.data?.error || 'Failed to delete restaurant'
+              ? error?.response?.data?.message || 'Failed to delete restaurant'
               : 'Failed to delete restaurant',
           });
-          return null
+          // return null
+          throw error  // Re-throw for component handling
         }
       },
     }),
-    // {
-    //   name: 'restaurant-storage',
-    //   partialize: (state) => ({
-    //     // user: state.user,
-    //     restaurants: state.restaurants,
-    //   }),
-    // }
+    {
+      name: 'restaurant-storage',
+      partialize: (state) => ({
+        // user: state.user,
+        restaurants: state.restaurants,
+      }),
+    }
   )
 );

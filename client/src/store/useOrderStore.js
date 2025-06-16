@@ -141,7 +141,7 @@ const useOrderStore = create(
         set({ isLoading: true, error: null });
         
         try {
-          const response = await orderAxios.get(`/${orderId}`);
+          const response = await orderAxios.get(`/getOrderById/${orderId}`);
           set({ isLoading: false });
           return response.data.order;
         } catch (error) {

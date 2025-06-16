@@ -18,9 +18,10 @@ const LogoutFallback = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       logout();
-      toast({
-        title: "Logged out",
+      toast.success("Logged out...",{
+        // title: "Logged out",
         description: "You've been successfully logged out.",
+        variant: "default"
       });
       navigate('/login');
     }, 2000);

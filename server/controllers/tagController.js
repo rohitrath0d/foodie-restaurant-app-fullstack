@@ -49,7 +49,7 @@ const getAllTagsController = async (req, res) => {
     res.status(200).send({
       success: true,
       message: "Tags fetched successfully",
-      tags
+      tags      // This should be an array  
     });
   } catch (error) {
     console.error('Error fetching tags:', error.message);

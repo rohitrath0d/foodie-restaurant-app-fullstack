@@ -18,24 +18,40 @@ import { useEffect } from "react";
 // Pass the selected restaurant to the form via props
 
 const RestaurantParentComponent = () => {
-  const { restaurants, getAllRestaurants, deleteRestaurantById } = useRestaurantStore();
+  // eslint-disable-next-line no-unused-vars
+  const { restaurants, getAllRestaurants, deleteRestaurantById, isLoading } = useRestaurantStore();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingRestaurant, setEditingRestaurant] = useState(null);
 
   // Refresh restaurant list
   const refreshRestaurants = async () => {
-    await getAllRestaurants();
+    console.log('Refreshing restaurants...');
+    await getAllRestaurants();       // This should update the store's restaurants array
+    console.log('After refresh:', restaurants);
   };
+
 
   // Handle edit initialization
   const handleEditInit = (restaurant) => {
-    setEditingRestaurant(restaurant);
+    console.log('Editing restaurant:', restaurant);
+    console.log('Restaurant ID:', restaurant._id);
+
+    // setEditingRestaurant(restaurant);
+    setEditingRestaurant({
+      ...restaurant,
+      _id: restaurant._id,  // Explicitly include _id
+      coordsLat: restaurant.coords?.lat || 0,  // Add coordinates if needed
+      coordsLng: restaurant.coords?.lng || 0
+    });
     setIsFormOpen(true);
   };
 
   useEffect(() => {
+    console.log('Restaurants in store:', restaurants);
+    refreshRestaurants();
     getAllRestaurants();
-  }, [getAllRestaurants]);
+  }, [getAllRestaurants, restaurants, refreshRestaurants]);
+
 
 
   // // Handle form submission (both create and update)
@@ -68,15 +84,22 @@ const RestaurantParentComponent = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {restaurants.map((restaurant) => (
-          <RestaurantCard
-            key={restaurant.id}
-            restaurant={restaurant}
-            onEdit={() => handleEditInit(restaurant)}                             // edit restaurant through card
-            onDelete={() => handleDelete(restaurant.id)}              // delete restaurant through card
+        { restaurants.length > 0 ? (
 
-          />
-        ))}
+          restaurants.map((restaurant) => (
+            // In your parent component (where you open the edit form), make sure you're passing the restaurant object with _id:
+            <RestaurantCard
+              key={restaurant._id}
+              restaurant={restaurant}
+              onEdit={() => handleEditInit(restaurant)}                    // edit restaurant through card
+              onDelete={() => handleDelete(restaurant._id)}               // Use _id here too, has to meet consistency with backend/useRestaurantStore/ handleDelete method in RestaurantCard.jsx   // delete restaurant through card
+            />
+        ))
+      ):(
+        <div className="col-span-full text-center py-10">
+            <p>No restaurants found. Create one to get started!</p>
+        </div>
+      )}
       </div>
 
       {/* Restaurant Form Modal/Dialog */}
@@ -92,16 +115,26 @@ const RestaurantParentComponent = () => {
       )} */}
 
       {/* Restaurant Form Modal */}
-      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+      {/* <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}> */}
+      <Dialog open={isFormOpen} onOpenChange={(open) => {
+        if (!open) {
+          setEditingRestaurant(null); // Reset editing state when closing
+        }
+        setIsFormOpen(open);
+      }}>
         <DialogContent className="sm:max-w-[625px]">
-          <RestaurantForm
-            restaurant={editingRestaurant}
-            onSuccess={() => {
-              refreshRestaurants();         // re-fetch from backend
-              setIsFormOpen(false);
-            }}
-            onCancel={() => setIsFormOpen(false)}
-          />
+          {isFormOpen && ( // Ensures form mounts fresh each time
+            <RestaurantForm
+              restaurant={editingRestaurant}    // Make sure this has _id field
+              // In your form success callback:
+              onSuccess={async  () => {
+                await refreshRestaurants();         // re-fetch from backend
+                setIsFormOpen(false);
+                setEditingRestaurant(null);
+              }}
+              onCancel={() => setIsFormOpen(false)}
+            />
+          )}
         </DialogContent>
       </Dialog>
     </div>

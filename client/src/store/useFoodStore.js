@@ -36,7 +36,8 @@ export const useFoodStore = create(
       createFood: async (title, description, price, imageUrl, foodTags, category, code, isAvailable, restaurant, rating) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await foodAxios.post(`${API_ROUTES.FOOD}/createFood`, {
+          // const response = await foodAxios.post(`${API_ROUTES.FOOD}/createFood`, {
+          const response = await foodAxios.post(`/createFood`, {
             title, description, price, imageUrl, foodTags, category, code, isAvailable, restaurant, rating
           });
           set({ isLoading: false });
@@ -55,7 +56,8 @@ export const useFoodStore = create(
       getAllFood: async () => {
         set({ isLoading: true, error: null });
         try {
-          const response = await foodAxios.get(`${API_ROUTES.FOOD}/getAllFood`);
+          // const response = await foodAxios.get(`${API_ROUTES.FOOD}/getAllFood`);
+          const response = await foodAxios.get(`/getAllFood`);
           console.log('FoodResponse', response);
           // set({ isLoading: false, foods: response.data.foods }); 
           set({ isLoading: false, food: response.data.foods }); // Changed from foods to food
@@ -75,7 +77,8 @@ export const useFoodStore = create(
       getFoodById: async (foodId) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await foodAxios.get(`${API_ROUTES.FOOD}/getFoodByRestaurantId/${foodId}`);
+          // const response = await foodAxios.get(`${API_ROUTES.FOOD}/getFoodByRestaurantId/${foodId}`);
+          const response = await foodAxios.get(`/getFoodByRestaurantId/${foodId}`);
 
           set({ isLoading: false, food: response.data.food });
         } catch (error) {
@@ -92,7 +95,8 @@ export const useFoodStore = create(
       getFoodByRestaurantId: async (restaurantId) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await foodAxios.get(`${API_ROUTES.FOOD}/getFoodByRestaurantId/${restaurantId}`);
+          // const response = await foodAxios.get(`${API_ROUTES.FOOD}/getFoodByRestaurantId/${restaurantId}`);
+          const response = await foodAxios.get(`/getFoodByRestaurantId/${restaurantId}`);
 
           set({ isLoading: false, food: response.data.food });
         } catch (error) {
@@ -139,7 +143,8 @@ export const useFoodStore = create(
       updateFood: async (foodID, updatedFood) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await foodAxios.put(`${API_ROUTES.FOOD}/updateFood/${foodID}`, updatedFood);
+          // const response = await foodAxios.put(`${API_ROUTES.FOOD}/updateFood/${foodID}`, updatedFood);
+          const response = await foodAxios.put(`/updateFood/${foodID}`, updatedFood);
           
           // set({ user: null, isLoading: false });
           // IMPORTANT POINT TO BE NOTED:
@@ -171,7 +176,8 @@ export const useFoodStore = create(
       deleteFood: async (id) => {
         set({ isLoading: true, error: null });
         try {
-          await foodAxios.delete(`${API_ROUTES.FOOD}/deleteFood/${id}`);
+          // await foodAxios.delete(`${API_ROUTES.FOOD}/deleteFood/${id}`);
+          await foodAxios.delete(`/deleteFood/${id}`);
           set({ user: null, isLoading: false });
         } catch (error) {
           set({

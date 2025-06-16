@@ -30,7 +30,8 @@ const useCategoryStore = create(
   persist(
     (set, get) => ({
       // user: null,
-      category: [],
+      // category: [],
+      categories: [], // Changed from 'category' to 'categories'
       isLoading: false,
       error: null,
 
@@ -42,7 +43,7 @@ const useCategoryStore = create(
         set({ isLoading: true, error: null });
         try {
           // const response = await axiosInstance.post(`${API_ROUTES.CATEGORY}/createCategory`, {
-          const response = await categoryAxios.post(`${API_ROUTES.CATEGORY}/createCategory`, {
+          const response = await categoryAxios.post(`/createCategory`, {
             title, imageUrl
           }
             // {
@@ -52,7 +53,13 @@ const useCategoryStore = create(
             //   }
             // }
           );
-          set({ isLoading: false });
+          // set({ isLoading: false });
+
+          set((state) => ({
+            categories: [...state.categories, response.data],
+            isLoading: false
+          }));
+
           return response.data.category;
         } catch (error) {
           set({
@@ -69,9 +76,9 @@ const useCategoryStore = create(
         set({ isLoading: true, error: null });
         try {
           // const response = await axiosInstance.get(`${API_ROUTES.CATEGORY}/getAllCategory`);
-          const response = await categoryAxios.get(`${API_ROUTES.CATEGORY}/getAllCategory`);
+          const response = await categoryAxios.get(`/getAllCategory`);
           console.log('categoryResponse', response);
-          set({ isLoading: false, category: response.data.categories });      // Changed from categories to category. Because in backend controller of getAllCategory, we used the res.send as {categories}, and hence here in frontend we are passing category (singular name for the plurals too).
+          set({ isLoading: false, categories: response.data.categories });      // Changed from categories to category. Because in backend controller of getAllCategory, we used the res.send as {categories}, and hence here in frontend we are passing category (singular name for the plurals too).
           return true;
         } catch (error) {
           set({
@@ -87,7 +94,7 @@ const useCategoryStore = create(
       // take id here,
       updateCategory: async (id, updateCategory) => {
 
-        const { title, imageUrl } = updateCategory
+        const { title, imageUrl } = updateCategory;
 
         // console.log('Updating category with ID:', id); // Debug log
         console.log('Received in store - ID:', id, 'Data:', updateCategory);
@@ -105,7 +112,8 @@ const useCategoryStore = create(
 
         try {
           // const response = await axiosInstance.put(`${API_ROUTES.CATEGORY}/updateCategory/${id}`, { title, imageUrl });
-          const response = await categoryAxios.put(`${API_ROUTES.CATEGORY}/updateCategory/${id}`, { title, imageUrl });
+          // const response = await categoryAxios.put(`${API_ROUTES.CATEGORY}/updateCategory/${id}`, { title, imageUrl });
+          const response = await categoryAxios.put(`/updateCategory/${id}`, { title, imageUrl });
           // set({ isLoading: false, category: response.data.updateCategory });
 
           // // Verify the response contains the updated category
@@ -117,7 +125,7 @@ const useCategoryStore = create(
           // Update local state
           set(state => ({
             isLoading: false,
-            category: state.category.map(category =>
+            categories: state.categories.map(category =>
               category._id === id ? response.data.updatedCategory : category
             )
           }));
@@ -145,7 +153,7 @@ const useCategoryStore = create(
         set({ isLoading: true, error: null });
         try {
           // const response = await axiosInstance.delete(`${API_ROUTES.CATEGORY}/deleteCategory/${id}`);
-          const response = await categoryAxios.delete(`${API_ROUTES.CATEGORY}/deleteCategory/${id}`);
+          const response = await categoryAxios.delete(`/deleteCategory/${id}`);
           console.log("Deleted:", response.data.message);
           // set({ isLoading: false, food: response.data.food });
         } catch (error) {
@@ -164,7 +172,8 @@ const useCategoryStore = create(
       name: 'category-storage',
       partialize: (state) => ({
         //  user: state.user 
-        category: state.category
+        // category: state.category
+        categories: state.categories // Update this too
       }),
     }
   )
