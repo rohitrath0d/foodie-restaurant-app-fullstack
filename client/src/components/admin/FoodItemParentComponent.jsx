@@ -23,17 +23,21 @@ import { API_ROUTES } from "@/utils/api";
 // Render the form conditionally (either for creation or editing)
 // Pass the selected restaurant to the form via props
 
-const FoodItemParentComponent = ({ restaurantId }) => {   // Add restaurantId as prop
+// const FoodItemParentComponent = ({ restaurantId }) => {   // Add restaurantId as prop
+const FoodItemParentComponent = () => {   // Add restaurantId as prop
 
   const { food, getAllFood, deleteFood } = useFoodStore();
   const [categories, setCategories] = useState([]);
   const [tags, setTags] = useState([]);
+  const [restaurants, setRestaurants] = useState([])
   const [isFormOpen, setIsFormOpen] = useState(false);
   // const [editingRestaurant, setEditingRestaurant] = useState(null);
   const [editingFood, setEditingFood] = useState(null);
 
+  const [isLoading, setIsLoading] = useState(true); // Add loading state
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
   const [isLoadingTags, setIsLoadingTags] = useState(false);
+  const [isLoadingRestaurants, setIsLoadingRestaurants] = useState(false);
 
   // Refresh restaurant list
   // const refreshRestaurants = async () => {
@@ -61,8 +65,10 @@ const FoodItemParentComponent = ({ restaurantId }) => {   // Add restaurantId as
   // Fetch categories and tags when component mounts
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       setIsLoadingCategories(true);
       setIsLoadingTags(true);
+      setIsLoadingRestaurants(true);
       try {
         await getAllFood();
         // Add these API calls to fetch categories and tags
@@ -71,13 +77,14 @@ const FoodItemParentComponent = ({ restaurantId }) => {   // Add restaurantId as
         // setCategories(catResponse.data);
         // setTags(tagsResponse.data);
 
-        const [catResponse, tagsResponse] = await Promise.all([
+        const [catResponse, tagsResponse, restaurantResponse] = await Promise.all([
           // axios.get('/api/v1/category'),
           axios.get(`${API_ROUTES.CATEGORY}/getAllCategory`),
           // categoryAxios.get(`${API_ROUTES.CATEGORY}`),
           // axios.get('/api/v1/tags')
-          axios.get(`${API_ROUTES.TAGS}/getAllTags`)
+          axios.get(`${API_ROUTES.TAGS}/getAllTags`),
           // tagsAxios.get(`${API_ROUTES.TAGS}`)
+          axios.get(`${API_ROUTES.RESTAURANT}/getAllRestaurants`)
         ]);
 
         // console.log('Category API Response:', catResponse.data);
@@ -86,12 +93,15 @@ const FoodItemParentComponent = ({ restaurantId }) => {   // Add restaurantId as
         // Ensure you're extracting the correct data
         setCategories(catResponse.data.categories || []);
         setTags(tagsResponse.data.tags || []);
+        setRestaurants(restaurantResponse.data.restaurants || [])
 
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
+        setIsLoading(false);
         setIsLoadingCategories(false);
         setIsLoadingTags(false);
+        setIsLoadingRestaurants(false);
       }
     };
     fetchData();
@@ -100,14 +110,24 @@ const FoodItemParentComponent = ({ restaurantId }) => {   // Add restaurantId as
   useEffect(() => {
     console.log('Categories:', categories);
     console.log('Tags:', tags);
-  }, [categories, tags]);
+    console.log('Restaurants:', restaurants);
+  }, [categories, tags, restaurants]);
 
   // // Handle form submission (both create and update)
   const handleFormSubmit = async () => {
     // await refreshRestaurants();
-    await refreshFoods();
-    setIsFormOpen(false);
-    getAllFood(null);
+    // await refreshFoods();
+    // setIsFormOpen(false);
+    // getAllFood(null);
+
+    try {
+      await getAllFood(); // Refresh the food list
+      setIsFormOpen(false);
+      setEditingFood(null);
+      toast.success("Food item saved successfully");
+    } catch (error) {
+      console.error("Error refreshing food list:", error);
+    }
   };
 
   // Handle delete
@@ -135,19 +155,29 @@ const FoodItemParentComponent = ({ restaurantId }) => {   // Add restaurantId as
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {/* {food.map((restaurant) => ( */}
-        {food.map((food) => (
-          // <RestaurantCard
-          <FoodItemCard
-            key={food.id}
-            food={food}             // Pass the current item
-            onEdit={() => handleEditInit(food)}                             // edit restaurant through card
-            onDelete={() => handleDelete(food.id)}                          // delete restaurant through card
-          // onSuccess={handleFormSubmit} // handle form submission
-          />
-        ))}
-      </div>
+
+      {isLoading ? (
+        <div>Loading food items...</div>
+      ) : Array.isArray(food) && food.length > 0 ? (
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* {food.map((restaurant) => ( */}
+          {food.map((food) => (
+            // <RestaurantCard
+            <FoodItemCard
+              key={food._id}
+              food={food}             // Pass the current item
+              onEdit={() => handleEditInit(food)}                             // edit restaurant through card
+              onDelete={() => handleDelete(food._id)}                          // delete restaurant through card
+            // onSuccess={handleFormSubmit} // handle form submission
+            />
+          ))}
+        </div>
+      ) : (
+        <div>No food items found</div>
+      )}
+
+
 
       {/* Restaurant Form Modal/Dialog */}
       {/* {isFormOpen && (                                  // --> This creates a duplicate dialog, hence commented out.
@@ -213,10 +243,12 @@ const FoodItemParentComponent = ({ restaurantId }) => {   // Add restaurantId as
             }}
             categories={categories}
             tags={tags}
-            restaurantId={restaurantId} // Pass the actual restaurant ID
+            // restaurantId={restaurantId} // Pass the actual restaurant ID
+            restaurants={restaurants}
 
             isLoadingCategories={isLoadingCategories}
             isLoadingTags={isLoadingTags}
+            isLoadingRestaurants={isLoadingRestaurants}
           />
         </DialogContent>
       </Dialog>

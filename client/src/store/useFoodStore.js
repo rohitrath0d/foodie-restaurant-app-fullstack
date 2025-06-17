@@ -40,8 +40,8 @@ export const useFoodStore = create(
           const response = await foodAxios.post(`/createFood`, {
             title, description, price, imageUrl, foodTags, category, code, isAvailable, restaurant, rating
           });
-          set({ isLoading: false });
-          return response.data.newFood;
+          set({ isLoading: false ,food: response.data.newFood });
+          return true;
         } catch (error) {
           set({
             isLoading: false,
@@ -200,12 +200,12 @@ export const useFoodStore = create(
       //   }
       // },
     }),
-    // {
-    //   name: 'food-storage',
-    //   partialize: (state) => ({
-    //     //  user: state.user 
-    //     food: state.food
-    //   }),
-    // }
+    {
+      name: 'food-storage',
+      partialize: (state) => ({
+        //  user: state.user 
+        food: state.food
+      }),
+    }
   )
 );

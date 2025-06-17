@@ -1,3 +1,4 @@
+const { default: mongoose } = require("mongoose");
 const foodModel = require("../models/foodModel");
 
 
@@ -8,13 +9,38 @@ const createFoodController = async (req, res) => {
     const { title, description, price, imageUrl, foodTags, category, code, isAvailable, restaurant, rating } = req.body;
 
     if (!title || !description || !price || !imageUrl || !foodTags || !category || !code || !isAvailable || !restaurant || !rating) {
-      return res.status(500).send({
+      return res.status(400).send({
         success: false,
         message: "Please Provide all fields"
       })
     }
+
+
+    // // Extract tag IDs from the foodTags array
+    // const tagIds = Array.isArray(foodTags) 
+    //   ? foodTags.map(tag => tag._id || tag.id)
+    //   : [foodTags]; // Fallback if single tag is sent
+
+    // Convert foodTags to proper ObjectId array
+    const tagIds = foodTags.map(tag =>
+      mongoose.Types.ObjectId.isValid(tag._id || tag)
+        ? new mongoose.Types.ObjectId(tag._id || tag)
+        : null
+    ).filter(Boolean);
+
     const newFood = new foodModel({
-      title, description, price, imageUrl, foodTags, category, code, isAvailable, restaurant, rating,
+      title,
+      description,
+      price,
+      imageUrl,
+      // foodTags,
+      // foodTags: tagId, // Store single tag reference
+      foodTags: tagIds, // Array of tag references
+      category,
+      code,
+      isAvailable,
+      restaurant,
+      rating,
     });
 
     await newFood.save();
@@ -29,7 +55,7 @@ const createFoodController = async (req, res) => {
     res.status(500).send({
       success: false,
       message: "Error in Create Food api",
-      error: error,
+      error: error.message,
     });
   }
 }

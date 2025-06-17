@@ -24,21 +24,31 @@ const useOrderStore = create(
   persist(
     (set, get) => ({
       orders: [],
+
+      statusCounts: {
+        pending: 0,
+        preparing: 0,
+        prepared: 0,
+        ontheway: 0,
+        delivered: 0
+      },
+
       isLoading: false,
       error: null,
+      
 
       // Place a new order
       placeOrder: async (cart) => {
         if (!cart || cart.length === 0) {
-          set({ 
+          set({
             error: 'Please add items to cart before placing order',
-            isLoading: false 
+            isLoading: false
           });
           return false;
         }
 
         set({ isLoading: true, error: null });
-        
+
         try {
           const response = await orderAxios.post('/placeOrder', { cart });
           set((state) => ({
@@ -62,9 +72,21 @@ const useOrderStore = create(
         set({ isLoading: true, error: null });
         try {
           const response = await orderAxios.get('/getAllOrders');
-          set({ 
+          const orders = response.data.orders;
+
+           // Calculate status counts
+          const counts = {
+            pending: orders.filter(o => !o.status || o.status === 'preparing').length,
+            preparing: orders.filter(o => o.status === 'preparing').length,
+            prepared: orders.filter(o => o.status === 'prepared').length,
+            ontheway: orders.filter(o => o.status === 'on-the-way').length,
+            delivered: orders.filter(o => o.status === 'delivered').length
+          };
+
+          set({
             orders: response.data.orders,
-            isLoading: false 
+            statusCounts: counts,
+            isLoading: false
           });
           return true;
         } catch (error) {
@@ -83,9 +105,9 @@ const useOrderStore = create(
         set({ isLoading: true, error: null });
         try {
           const response = await orderAxios.get('/user-orders');
-          set({ 
+          set({
             orders: response.data.orders,
-            isLoading: false 
+            isLoading: false
           });
           return true;
         } catch (error) {
@@ -102,19 +124,19 @@ const useOrderStore = create(
       // Update order status (admin only)
       updateOrderStatus: async (orderId, status) => {
         if (!orderId || !status) {
-          set({ 
+          set({
             error: 'Order ID and status are required',
-            isLoading: false 
+            isLoading: false
           });
           return false;
         }
 
         set({ isLoading: true, error: null });
-        
+
         try {
           const response = await orderAxios.post(`/orderStatus/${orderId}`, { status });
           set((state) => ({
-            orders: state.orders.map(order => 
+            orders: state.orders.map(order =>
               order._id === orderId ? response.data.updatedOrder : order
             ),
             isLoading: false
@@ -139,7 +161,7 @@ const useOrderStore = create(
         }
 
         set({ isLoading: true, error: null });
-        
+
         try {
           const response = await orderAxios.get(`/getOrderById/${orderId}`);
           set({ isLoading: false });

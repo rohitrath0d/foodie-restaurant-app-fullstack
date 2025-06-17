@@ -4,23 +4,22 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 // import FoodItemParentComponent from "../../components/admin/FoodItemParentComponent";
 import RestaurantParentComponent from "@/components/admin/RestaurantParentComponent";
-// import { useFoodStore } from "../../store/useFoodStore";
-// import CategoriesTabMenu from "@/components/admin/CategoriesTabMenu";
-// import TagsTabMenu from "../../components/admin/TagsTabMenu";
-// import useCategoryStore from "@/store/useCategoryStore";
-// import { useTagStore } from "@/store/useTagStore";
+
 import { useRestaurantStore } from "@/store/useRestaurantStore";
 import RestaurantForm from "@/components/admin/RestaurantForm";
 import { Button } from "@/components/ui/button";
+import { ErrorBoundary } from "react-error-boundary";
+import ErrorFallback from "@/components/ErrorBoundary";
 
 const RestaurantManagement = () => {
 
   const { restaurants } = useRestaurantStore()
 
-  const [activeTab, setActiveTab] = useState("createRestaurants");
-
-
+  // const [activeTab, setActiveTab] = useState("createRestaurants");
+    const [activeTab, setActiveTab] = useState("ListedRestaurants"); // Default to list view
+ 
   return (
+    // <ErrorBoundary  FallbackComponent={ErrorFallback}> 
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold mb-2">Restaurant Management</h1>
@@ -34,6 +33,7 @@ const RestaurantManagement = () => {
           {/* <TabsTrigger value="tags">Tags</TabsTrigger> */}
         </TabsList>
 
+          <ErrorBoundary FallbackComponent={ErrorFallback}>
         <TabsContent value="ListedRestaurants" className="space-y-6">
           {/* <RestaurantParentComponent
             // menuItems={food} 
@@ -60,7 +60,8 @@ const RestaurantManagement = () => {
               </div>
             )}
         </TabsContent>
-
+        
+        </ErrorBoundary>
         {/* <TabsContent value="categories" className="space-y-6">
           <CategoriesTabMenu />
         </TabsContent>
@@ -91,6 +92,7 @@ const RestaurantManagement = () => {
 
       </Tabs>
     </div>
+    // </ErrorBoundary>
   );
 };
 

@@ -125,7 +125,7 @@ export const useRestaurantStore = create(
           });
           // return false;
           // throw error;
-          return [];
+          return [];      // Return empty array on error
         }
       },
 

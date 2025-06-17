@@ -77,7 +77,8 @@ const AdminLayout = () => {
   const navItems = [
     { path: "/admin/restaurant-management", label: "Manage Restaurants", icon: HandPlatter },
     { path: "/admin/menu-management", label: "Manage Menu", icon: BookOpen },
-    { path: "/admin/orders", label: "Orders", icon: ClipboardList },
+    // { path: "/admin/orders", label: "Orders", icon: ClipboardList },
+    { path: "/admin/order-management", label: "Orders", icon: ClipboardList },
     { path: "/admin/settings", label: "Settings", icon: Settings },
     { path: "/admin/dashboard", label: "Dashboard", icon: Home },
 

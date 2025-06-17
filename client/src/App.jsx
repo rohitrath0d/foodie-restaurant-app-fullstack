@@ -23,56 +23,58 @@ import Profile from './pages/client/Profile';
 import Cart from './pages/client/Cart';
 import { TooltipProvider } from "./components/ui/tooltip";
 import { Toaster } from './components/ui/sonner';
-import NotFoundPage from './pages/NotFoundPage';
-
-
+import NotFoundPage from './components/NotFoundPage';
+import LandingPage from './components/LandingPage';
 
 function App() {
 
   return (
     <>
       <TooltipProvider>
-      <BrowserRouter>
-        <Routes>
+        <BrowserRouter>
+          <Routes>
 
-          <Route path='/register' element={<RegisterPage />} />
-          <Route path='/login' element={<LoginPage />} />
-          <Route path='/logout' element={<LogoutFallback />} />
+            {/* Landing Page */}
+            <Route path="/" element={<LandingPage />} />
 
-          <Route path='/' element={<SharedSidebarLayout type="client" />}>
-            <Route index element={<Home />} />
-            <Route path="cart" element={<Cart />} />
-            <Route path="orders" element={<Orders />} />
-            <Route path="profile" element={<Profile />} />
-          </Route>
+            <Route path='/register' element={<RegisterPage />} />
+            <Route path='/login' element={<LoginPage />} />
+            <Route path='/logout' element={<LogoutFallback />} />
 
-          {/* Admin routes */}
-          <Route path='/admin' element={<AdminLayout />}>
-            <Route index element={<Dashboard />} />
-            {/* <Route path='orders' element={<OrdersPage/>}/> */}
+            <Route path='/sidebar' element={<SharedSidebarLayout type="client" />}>
+              <Route index element={<Home />} />
+              <Route path="cart" element={<Cart />} />
+              <Route path="orders" element={<Orders />} />
+              <Route path="profile" element={<Profile />} />
+            </Route>
 
-            {/* Since it's already nested under path='/admin', you should remove the leading slash:
+            {/* Admin routes */}
+            <Route path='/admin' element={<AdminLayout />}>
+              <Route index element={<Dashboard />} />
+              {/* <Route path='orders' element={<OrdersPage/>}/> */}
+
+              {/* Since it's already nested under path='/admin', you should remove the leading slash:
             React Router treats path="/..." as absolute, and path="..." as relative to parent. */}
 
-            
-            {/* <Route path='/admin/restaurant-management' element={<RestaurantManagement />} /> */}
-            <Route path='restaurant-management' element={<RestaurantManagement />} />
-            {/* <Route path='/admin/menu' element={<MenuManagement />} /> */}
-            <Route path='menu-management' element={<MenuManagement />} />
-            {/* <Route path='/admin/orders' element={<OrderManagement />} /> */}
-            <Route path='orders-management' element={<OrderManagement />} />
-            {/* <Route path='menu' element={<MenuPage/>}/> */}
-            {/* <Route path='settings' element={<SettingsPage/>}/> */}
-            {/* Add more admin routes as needed */}
-          </Route>
 
-           {/* Not Found */}
-          <Route path="*" element={<NotFoundPage />} />
+              {/* <Route path='/admin/restaurant-management' element={<RestaurantManagement />} /> */}
+              <Route path='restaurant-management' element={<RestaurantManagement />} />
+              {/* <Route path='/admin/menu' element={<MenuManagement />} /> */}
+              <Route path='menu-management' element={<MenuManagement />} />
+              {/* <Route path='/admin/orders' element={<OrderManagement />} /> */}
+              <Route path='order-management' element={<OrderManagement />} />
+              {/* <Route path='menu' element={<MenuPage/>}/> */}
+              {/* <Route path='settings' element={<SettingsPage/>}/> */}
+              {/* Add more admin routes as needed */}
+            </Route>
 
-        </Routes>
-      </BrowserRouter>
+            {/* Not Found */}
+            <Route path="*" element={<NotFoundPage />} />
 
-      <Toaster position= "top-right" />
+          </Routes>
+        </BrowserRouter>
+
+        <Toaster position="top-right" />
       </TooltipProvider>
     </>
   );

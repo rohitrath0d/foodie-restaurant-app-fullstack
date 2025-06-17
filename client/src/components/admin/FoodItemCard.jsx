@@ -66,7 +66,7 @@ const FoodItemCard = ({ food, onEdit, onDelete }) => {
       // await deleteFood(food.id);
       onDelete(food.id)
       // onDelete(restaurant.id);
-      toast.success("Success",
+      toast.success("Food item has been deleted",
         {
           // title: "Success",
           description: `${food.title} has been deleted`,

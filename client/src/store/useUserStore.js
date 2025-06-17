@@ -3,12 +3,29 @@ import {API_ROUTES} from '../utils/api'
 import axios from 'axios'
 import { create } from 'zustand'
 import {persist} from 'zustand/middleware'
+import useAuthStore from './useAuthStore'
 
 // Axios instance setup
-const axiosInstance = axios.create({
+// const axiosInstance = axios.create({
+//   baseURL: API_ROUTES.USER,
+//   withCredentials: true,
+// })
+
+// const userInstance = axios.create({
+const userAxios = axios.create({
   baseURL: API_ROUTES.USER,
   withCredentials: true,
 })
+
+
+// Add auth interceptor to inject token
+userAxios.interceptors.request.use((config) => {
+  const token = useAuthStore.getState().token;
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
 export const useUserStore =  create(
   persist(
@@ -17,11 +34,15 @@ export const useUserStore =  create(
       error: null,
       user: [],
 
+
       // createUser -> we dont need this, coz for the creation of user, we did in authController and not user. user is solely for handling the user data after login.
+
       getUser: async (id) => {
         set({isLoading: true, error: null});
         try {
-          const response = await axiosInstance.get(`${API_ROUTES.USER}/getUser/${id}`);
+          // const response = await axiosInstance.get(`${API_ROUTES.USER}/getUser/${id}`);
+          // const response = await userInstance.get(`/getUser/${id}`);
+          const response = await userAxios.get(`/getUser/${id}`);
           set({isLoading: false});
           return response.data.getUser;
           
@@ -40,7 +61,9 @@ export const useUserStore =  create(
       updateUser: async (id, { userName, email, address, phone}) => {
         set({isLoading: true, error: null});
         try {
-          const response = await axiosInstance.put(`${API_ROUTES.USER}/updateUser/${id}`, {
+          // const response = await axiosInstance.put(`${API_ROUTES.USER}/updateUser/${id}`, {
+          // const response = await userInstance.put(`/updateUser/${id}`, {
+          const response = await userAxios.put(`/updateUser/${id}`, {
             userName,
             email,
             address,
@@ -61,7 +84,9 @@ export const useUserStore =  create(
       userUpdatePassword: async(id, { oldPassword, newPassword }) => {
         set({isLoading: true, error: null});
         try {
-          const response = await axiosInstance.put(`${API_ROUTES.USER}/updatePassword/${id}`, {
+          // const response = await axiosInstance.put(`${API_ROUTES.USER}/updatePassword/${id}`, {
+          // const response = await userInstance.put(`/updatePassword/${id}`, {
+          const response = await userAxios.put(`/updatePassword/${id}`, {
             oldPassword,
             newPassword
           });
@@ -81,7 +106,9 @@ export const useUserStore =  create(
       userResetPassword: async (id, { answer, newPassword }) => {
         set({isLoading: true, error: null});
         try {
-          const response = await axiosInstance.put(`${API_ROUTES.USER}/resetPassword/${id}`, {
+          // const response = await axiosInstance.put(`${API_ROUTES.USER}/resetPassword/${id}`, {
+          // const response = await userInstance.put(`/resetPassword/${id}`, {
+          const response = await userAxios.put(`/resetPassword/${id}`, {
             answer,
             newPassword
           });
@@ -101,7 +128,9 @@ export const useUserStore =  create(
       deleteUser: async (id) => {
         set({isLoading: true, error: null});
         try {
-          const response = await axiosInstance.delete(`${API_ROUTES.USER}/deleteUser/${id}`);
+          // const response = await axiosInstance.delete(`${API_ROUTES.USER}/deleteUser/${id}`);
+          // const response = await userInstance.delete(`/deleteUser/${id}`);
+          const response = await userAxios.delete(`/deleteUser/${id}`);
           set({isLoading: false});
           return response.data.message; // Assuming the backend returns a message on successful deletion
         } catch (error) {
@@ -113,6 +142,13 @@ export const useUserStore =  create(
           });
         }
       },
-    })
+    }),
+     {
+      name: 'user-storage',
+      partialize: (state) => ({
+        // user: state.user,
+        user: state.tags,
+      }),
+    }
   )
 )

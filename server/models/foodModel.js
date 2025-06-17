@@ -19,9 +19,11 @@ const foodSchema = new mongoose.Schema(
       type: String,
       default: "https://png.pngtree.com/png-vector/20220701/ourmid/pngtree-fast-food-logo-png-image_5573657.png"
     },
-    foodTags:{
-      type: String,
-    },
+    foodTags: [{
+      // type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Tags' // if you have a Tag model
+    }],
     category: {
       type: String,
     },
@@ -42,7 +44,7 @@ const foodSchema = new mongoose.Schema(
       min: 1,
       max: 5
     },
-    ratingCount:{
+    ratingCount: {
       type: String
     },
   },
