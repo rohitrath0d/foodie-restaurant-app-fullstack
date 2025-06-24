@@ -1,6 +1,6 @@
 const express = require("express");
 const authMiddleware = require("../middlewares/authMiddleware");
-const { createRestaurantController, getAllRestaurantsController, getRestaurantByIdController, deleteRestaurantByIdController, updateRestaurantController } = require("../controllers/restaurantController");
+const { createRestaurantController, getAllRestaurantsController, getRestaurantByIdController, deleteRestaurantByIdController, updateRestaurantController, getFeaturedRestaurantsController, getNearbyRestaurantsController } = require("../controllers/restaurantController");
 
 const router = express.Router();
 
@@ -14,6 +14,9 @@ router.get("/getAllRestaurants", getAllRestaurantsController);
 // Fetching a Single restaurant
 // GET RESTAURANT BY ID || GET
 router.get("/getRestaurantById/:id", getRestaurantByIdController)
+
+router.get('/getFeaturedRestaurants', getFeaturedRestaurantsController);
+router.get('/getNearbyRestaurants', getNearbyRestaurantsController);
 
 // UPDATE RESTAURANT BY ID || PUT 
 router.put("/updateRestaurantById/:id", authMiddleware, updateRestaurantController)

@@ -30,6 +30,10 @@ export const useFoodStore = create(
     (set, get) => ({
       // user: null,
       food: [],
+
+      popularFoods: [],
+      featuredFoods: [],
+
       isLoading: false,
       error: null,
 
@@ -40,7 +44,7 @@ export const useFoodStore = create(
           const response = await foodAxios.post(`/createFood`, {
             title, description, price, imageUrl, foodTags, category, code, isAvailable, restaurant, rating
           });
-          set({ isLoading: false ,food: response.data.newFood });
+          set({ isLoading: false, food: response.data.newFood });
           return true;
         } catch (error) {
           set({
@@ -109,6 +113,51 @@ export const useFoodStore = create(
         }
       },
 
+      // Fetch popular food items
+      // fetchPopularFoods: async () => {
+      getPopularFoods: async () => {
+        set({  
+          isLoading: true, 
+          
+          error: null });
+        try {
+          // const response = await axios.get(`${API_ROUTES.FOOD}/popular`);
+          const response = await foodAxios.get(`/getPopularFoods`);
+          set({
+            popularFoods: response.data.popularFoods || [],    // Ensure it's always an array
+            isLoading: false
+          });
+          console.log('Popular foods data:', response.data.popularFoods);
+        } catch (error) {
+          set({
+            error: error.message,
+            isLoading: false,
+            popularFoods: [] // Fallback empty array
+          });
+          return [];
+        }
+        // return [];
+      },
+
+
+      // Fetch featured food items
+      // fetchFeaturedFoods: async () => {
+      getFeaturedFoods: async () => {
+        set({ isLoading: true, error: null });
+        try {
+          // const response = await axios.get(`${API_ROUTES.FOOD}/featured`);
+          const response = await foodAxios.get(`/getFeaturedFoods`);
+          set({ featuredFoods: response.data.featuredFoods || [],   // ensure array
+             isLoading: false });
+        } catch (error) {
+          set({
+            featuredFoods: [],    // Fallback empty array 
+            error: error.message, 
+            isLoading: false });
+            return [];
+        }
+      },
+
 
 
       // updatedData on the frontend → becomes req.body on the backend
@@ -145,7 +194,7 @@ export const useFoodStore = create(
         try {
           // const response = await foodAxios.put(`${API_ROUTES.FOOD}/updateFood/${foodID}`, updatedFood);
           const response = await foodAxios.put(`/updateFood/${foodID}`, updatedFood);
-          
+
           // set({ user: null, isLoading: false });
           // IMPORTANT POINT TO BE NOTED:
           //  user: null is needed only when logging out or resetting state — not inside the actual deleteFood() call.
@@ -159,7 +208,7 @@ export const useFoodStore = create(
           // ✅ When to Use set({ user: null })
           // Only in these cases:   User clicks Log Out    |   Token is invalid and you force logout    |     Your app resets state, e.g., on session timeout.
 
-          set({  isLoading: false });
+          set({ isLoading: false });
           return response.data.updateFood;         // Ensure backend returns this
         } catch (error) {
           set({

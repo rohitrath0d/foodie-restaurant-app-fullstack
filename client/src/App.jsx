@@ -17,7 +17,6 @@ import MenuManagement from './pages/admin/MenuManagement';
 import LogoutFallback from './pages/auth/LogoutFallback';
 import OrderManagement from './pages/admin/OrderManagement';
 import ClientLayout from './layouts/ClientLayout';
-import Home from './pages/client/HomePage';
 import Orders from './pages/client/Orders';
 import Profile from './pages/client/Profile';
 import Cart from './pages/client/Cart';
@@ -25,6 +24,8 @@ import { TooltipProvider } from "./components/ui/tooltip";
 import { Toaster } from './components/ui/sonner';
 import NotFoundPage from './components/NotFoundPage';
 import LandingPage from './components/LandingPage';
+import HomePage from './pages/client/HomePage';
+
 
 function App() {
 
@@ -35,18 +36,21 @@ function App() {
           <Routes>
 
             {/* Landing Page */}
+            {/* <Route path="/landing-page" element={<LandingPage />} /> */}
             <Route path="/" element={<LandingPage />} />
 
             <Route path='/register' element={<RegisterPage />} />
             <Route path='/login' element={<LoginPage />} />
             <Route path='/logout' element={<LogoutFallback />} />
 
-            <Route path='/sidebar' element={<SharedSidebarLayout type="client" />}>
-              <Route index element={<Home />} />
-              <Route path="cart" element={<Cart />} />
-              <Route path="orders" element={<Orders />} />
-              <Route path="profile" element={<Profile />} />
-            </Route>
+            <Route path='/sidebar' element={<SharedSidebarLayout type="client" />}/>
+              {/* <Route index element={<Home />} /> */}
+              {/* <Route index element={<HomePage />} /> */}
+              <Route path='/home-page' element={<HomePage />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/orders" element={<Orders />} />
+              <Route path="/profile" element={<Profile />} />
+            {/* </Route> */}
 
             {/* Admin routes */}
             <Route path='/admin' element={<AdminLayout />}>

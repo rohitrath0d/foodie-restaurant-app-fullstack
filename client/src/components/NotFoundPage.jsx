@@ -26,7 +26,8 @@ const NotFoundPage = () => {
         <p className="text-gray-600 mb-6">
           We couldn't find the page you're looking for. The recipe might be missing some ingredients!
         </p>
-        <Link to="/">
+        {/* <Link to="/"> */}
+        <Link to="/landing-page">
           <Button className="bg-restaurant-softRed hover:bg-restaurant-softRed/90 flex items-center mx-auto">
             <Home size={16} className="mr-2" />
             Back to Home

@@ -37,7 +37,7 @@ function RegisterPage() {
 
   const form = useForm({
     defaultValues: {
-      name: '',
+      userName: '',
       email: '',
       password: '',
       phone: '',
@@ -50,19 +50,30 @@ function RegisterPage() {
 
   const handleSubmit = async (data) => {
     try {
-      const userId = await register(
-        data.name,
-        data.email,
-        data.password,
-        data.phone,
-        data.address,
-        data.answer
-      );
+      // 🔍 Problem: Mismatch in field names
+      // We're sending:     data.name,      // ❌ This will be passed as first argument, NOT as an object
+      // But in your useAuthStore:    userName,     // ✅ expects userName
+      // Fix: Pass an object
+      const userId = await register({
+        // data.name,
+        // data.email,
+        // data.password,
+        // data.phone,
+        // data.address,
+        // data.answer
+
+        userName: data.name,
+        email: data.email,
+        password: data.password,
+        phone: data.phone,
+        address: data.address,
+        answer: data.answer,
+      });
 
       if (userId) {
         toast.success(
           // title: "Registration Successful!",
-          "Login Successful!", {
+          "Register Successful!", {
           description: "You can now log in!",
           duration: 3000,
         });
@@ -71,7 +82,7 @@ function RegisterPage() {
     } catch (error) {
       toast.error(
         // title: 'Registration Failed',
-        "Login Failed", {
+        "Registration Failed", {
         description: error.message,
         variant: 'destructive',
       });
@@ -114,7 +125,8 @@ function RegisterPage() {
                 {/* Name Field */}
                 <FormField
                   control={form.control}
-                  name="name"
+                  // name="name"
+                  name="userName"
                   rules={{ required: "Full name is required" }}
                   render={({ field }) => (
                     // In each <FormItem>, add: className="w-full"

@@ -86,6 +86,7 @@ app.use("/api/v1/category", require("./routes/categoryRoutes"));
 app.use("/api/v1/food", require("./routes/foodRoutes"));
 app.use("/api/v1/orders", require("./routes/orderRoutes"));
 app.use("/api/v1/tags", require("./routes/tagRoutes")); // tag routes
+app.use("/api/v1/cart", require("./routes/cartRoutes")); // tag routes
 
 
 // app.use("/api/v1/admin", require("./routes/"))

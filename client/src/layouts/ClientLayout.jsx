@@ -6,7 +6,7 @@ const ClientLayout = () => {
   const location = useLocation();
   
   const navItems = [
-    { path: "/", label: "Home", icon: Home },
+    { path: "/home-page", label: "Home", icon: Home },
     { path: "/cart", label: "Cart", icon: ShoppingCart },
     { path: "/orders", label: "Orders", icon: ClipboardList },
     { path: "/profile", label: "Profile", icon: User },

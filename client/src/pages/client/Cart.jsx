@@ -200,7 +200,8 @@ const Cart = () => {
         <div className="text-center py-10">
           <h2 className="text-xl mb-4">Your cart is empty</h2>
           <p className="text-gray-500 mb-6">Add items to your cart to continue</p>
-          <Link to="/">
+          {/* <Link to="/"> */}
+          <Link to="/home-page">
             <Button className="bg-restaurant-softRed hover:bg-restaurant-softRed/90">
               Browse Restaurants
             </Button>

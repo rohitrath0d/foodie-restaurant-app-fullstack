@@ -29,6 +29,7 @@ restaurantAxios.interceptors.request.use((config) => {
 
 export const useRestaurantStore = create(
   persist(
+    // eslint-disable-next-line no-unused-vars
     (set, get) => ({
       // user: null,
       // Persisting user state (auth) and restaurant data can be done in separate stores with separate persist configs.
@@ -37,9 +38,13 @@ export const useRestaurantStore = create(
       // Do NOT include user inside restaurant store persist config unless you want them tightly coupled.
       // Just make sure in your UI logic or API calls, you check user from auth store to control access.
 
+      restaurants: [],        // restaurant []
+
+      featuredRestaurants: [],
+      nearbyRestaurants: [],
+
       isLoading: false,
       error: null,
-      restaurants: [],        // restaurant []
 
       // createRestaurant: async (
       //   title,
@@ -108,16 +113,22 @@ export const useRestaurantStore = create(
         try {
           // const response = await restaurantAxios.get(`${API_ROUTES.RESTAURANT}/getAllRestaurants`);
           const response = await restaurantAxios.get(`/getAllRestaurants`);
-          console.log('GetAllRestaurants', response.data);       // Verify _id exists
+          console.log('GetAllRestaurants', response.data.restaurants || []);       // Verify _id exists   // Ensure array fallback
           // get({ isLoading: false, restaurants: response.data.restaurants });
           set({
             isLoading: false,
             restaurants: response.data.restaurants
           });         // ✅ updating state   --> coz, we have to update the state everytime, when new restaurant comes in.
           // return true;
-          return response.data.restaurants;
+          return response.data.restaurants || [];
         } catch (error) {
-          get({
+          // get({
+          //   isLoading: false,
+          //   error: axios.isAxiosError(error)
+          //     ? error?.response?.data?.error || 'No Restaurant available'
+          //     : 'No Restaurant available',
+          // });
+          set({
             isLoading: false,
             error: axios.isAxiosError(error)
               ? error?.response?.data?.error || 'No Restaurant available'
@@ -135,7 +146,7 @@ export const useRestaurantStore = create(
           // const response = await restaurantAxios.get(`${API_ROUTES.RESTAURANT}/getRestaurantById/${id}`);
           const response = await restaurantAxios.get(`/getRestaurantById/${id}`);
           set({ isLoading: false });
-          return response.data.restaurant; // return the restaurant to use in frontend
+          return response.data.restaurant  || []; // return the restaurant to use in frontend
         } catch (error) {
           set({
             isLoading: false,
@@ -143,9 +154,45 @@ export const useRestaurantStore = create(
               ? error?.response?.data?.error || 'Failed to fetch restaurant'
               : 'Failed to fetch restaurant',
           });
-          return null;
+          // return null;
+          return [];
         }
       },
+
+
+      // Fetch featured restaurants
+      // fetchFeaturedRestaurants: async () => {
+      getFeaturedRestaurants: async () => {
+        set({ isLoading: true, error: null });
+        try {
+          // const response = await axios.get(`${API_ROUTES.RESTAURANT}/featured`);
+          const response = await restaurantAxios.get(`/getFeaturedRestaurants`);
+          set({ featuredRestaurants: response.data.restaurants || [], isLoading: false });
+        } catch (error) {
+          set({ error: error.message, isLoading: false });
+          return [];
+        }
+        // return [];
+      },
+
+
+      // Fetch nearby restaurants
+      // fetchNearbyRestaurants: async (location) => {
+      getNearbyRestaurants: async (location) => {
+        set({ isLoading: true, error: null });
+        try {
+          // const response = await axios.get(`${API_ROUTES.RESTAURANT}/nearby`, {
+          const response = await restaurantAxios.get(`${API_ROUTES.RESTAURANT}/getNearbyRestaurants`, {
+            params: { location }
+          });
+          set({ nearbyRestaurants: response.data.restaurants || [], isLoading: false });
+        } catch (error) {
+          set({ error: error.message, isLoading: false });
+            return [];
+        }
+        // return [];
+      },
+
 
       // refreshAcessToken: async () => {
       //   try {

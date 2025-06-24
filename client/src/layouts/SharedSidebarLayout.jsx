@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
 import React from "react";
 import { Outlet } from "react-router-dom";
@@ -43,7 +42,8 @@ const SharedSidebarLayout = ({ type }) => {
   const location = useLocation();
   
   const clientNavItems = [
-    { path: "/", label: "Home", icon: Home },
+    // { path: "/", label: "Home", icon: Home },
+    { path: "/home-page", label: "Home", icon: Home },
     { path: "/cart", label: "Cart", icon: ShoppingCart },
     { path: "/orders", label: "Orders", icon: ClipboardList },
     { path: "/profile", label: "Profile", icon: User },

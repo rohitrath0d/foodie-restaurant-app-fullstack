@@ -11,8 +11,10 @@
 
 
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+// import { RestaurantCard } from "../../components/shared/RestaurantCard";
 import { RestaurantCard } from "../../components/shared/RestaurantCard";
+// import { FoodCard } from "../../components/shared/FoodCard";
 import { FoodCard } from "../../components/shared/FoodCard";
 import { Input } from "../../components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
@@ -22,133 +24,276 @@ import { Badge } from "../../components/ui/badge";
 import { Search, MapPin, ArrowRight, Clock, Utensils, Tag, Star } from "lucide-react";
 // import { Restaurant, FoodItem, FoodTag } from "@/types";
 import { motion } from "framer-motion";
+import { useRestaurantStore } from "@/store/useRestaurantStore";
+import { useFoodStore } from "@/store/useFoodStore";
+import { ErrorBoundary } from "react-error-boundary";
+import ErrorFallback from "@/components/ErrorBoundary";
 
 // Sample food tags for our food items
-const foodTags= [
-  { id: "1", name: "Vegetarian", color: "#4CAF50" },
-  { id: "2", name: "Spicy", color: "#FF5722" },
-  { id: "3", name: "Gluten Free", color: "#9C27B0" },
-  { id: "4", name: "Organic", color: "#8BC34A" },
-  { id: "5", name: "Seafood", color: "#03A9F4" },
-  { id: "6", name: "Dessert", color: "#E91E63" },
-];
+// const foodTags= [
+//   { id: "1", name: "Vegetarian", color: "#4CAF50" },
+//   { id: "2", name: "Spicy", color: "#FF5722" },
+//   { id: "3", name: "Gluten Free", color: "#9C27B0" },
+//   { id: "4", name: "Organic", color: "#8BC34A" },
+//   { id: "5", name: "Seafood", color: "#03A9F4" },
+//   { id: "6", name: "Dessert", color: "#E91E63" },
+// ];
 
 // Sample restaurant data
-const sampleRestaurants= [
-  {
-    id: "1",
-    name: "Pasta Paradise",
-    logo: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1374&q=80",
-    rating: 4.5,
-    distance: "1.2 miles",
-    estimatedDeliveryTime: "20-30 min",
-    estimatedPickupTime: "10-15 min",
-    address: "123 Main St",
-    isOpen: true,
-    cuisineType: ["Italian", "Pasta"],
-    promotion: "20% Off First Order"
-  },
-  {
-    id: "2",
-    name: "Sushi Sensation",
-    logo: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-    rating: 4.7,
-    distance: "0.8 miles",
-    estimatedDeliveryTime: "25-35 min",
-    estimatedPickupTime: "15-20 min",
-    address: "456 Sushi Ave",
-    isOpen: true,
-    cuisineType: ["Japanese", "Sushi", "Asian"]
-  },
-  {
-    id: "3",
-    name: "Burgers & Bites",
-    logo: "https://images.unsplash.com/photo-1550317138-10000687a72b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1420&q=80",
-    rating: 4.3,
-    distance: "1.5 miles",
-    estimatedDeliveryTime: "15-25 min",
-    estimatedPickupTime: "10-15 min",
-    address: "789 Burger St",
-    isOpen: false,
-    cuisineType: ["American", "Burgers", "Fast Food"],
-    promotion: "Free Fries with Burger"
-  }
-];
+// const sampleRestaurants= [
+//   {
+//     id: "1",
+//     name: "Pasta Paradise",
+//     logo: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1374&q=80",
+//     rating: 4.5,
+//     distance: "1.2 miles",
+//     estimatedDeliveryTime: "20-30 min",
+//     estimatedPickupTime: "10-15 min",
+//     address: "123 Main St",
+//     isOpen: true,
+//     cuisineType: ["Italian", "Pasta"],
+//     promotion: "20% Off First Order"
+//   },
+//   {
+//     id: "2",
+//     name: "Sushi Sensation",
+//     logo: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+//     rating: 4.7,
+//     distance: "0.8 miles",
+//     estimatedDeliveryTime: "25-35 min",
+//     estimatedPickupTime: "15-20 min",
+//     address: "456 Sushi Ave",
+//     isOpen: true,
+//     cuisineType: ["Japanese", "Sushi", "Asian"]
+//   },
+//   {
+//     id: "3",
+//     name: "Burgers & Bites",
+//     logo: "https://images.unsplash.com/photo-1550317138-10000687a72b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1420&q=80",
+//     rating: 4.3,
+//     distance: "1.5 miles",
+//     estimatedDeliveryTime: "15-25 min",
+//     estimatedPickupTime: "10-15 min",
+//     address: "789 Burger St",
+//     isOpen: false,
+//     cuisineType: ["American", "Burgers", "Fast Food"],
+//     promotion: "Free Fries with Burger"
+//   }
+// ];
 
 // Sample food data
-const sampleFoods = [
-  {
-    id: "1",
-    title: "Margherita Pizza",
-    image: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1469&q=80",
-    price: 12.99,
-    description: "Classic Italian pizza with tomato sauce, mozzarella, and fresh basil. Made with our homemade dough and baked in a wood-fired oven.",
-    rating: 4.6,
-    available: true,
-    preparationTime: "15-20 min",
-    foodTags: [
-      foodTags[0], // Vegetarian
-      { id: "7", name: "Italian", color: "#FF9800" }
-    ],
-    hasCoupon: true,
-    couponCode: "PIZZA10",
-    couponDiscount: 10
-  },
-  {
-    id: "2",
-    title: "Chicken Alfredo Pasta",
-    image: "https://images.unsplash.com/photo-1645112411341-6c4fd023882a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-    price: 15.99,
-    description: "Creamy Alfredo sauce with grilled chicken breast served over fettuccine pasta. Garnished with parmesan cheese and parsley.",
-    rating: 4.4,
-    available: true,
-    preparationTime: "20-25 min",
-    foodTags: [
-      { id: "7", name: "Italian", color: "#FF9800" },
-      { id: "8", name: "Pasta", color: "#795548" }
-    ],
-    hasCoupon: false,
-    couponCode: "",
-    couponDiscount: 0
-  },
-  {
-    id: "3",
-    title: "Avocado Toast",
-    image: "https://images.unsplash.com/photo-1603046891744-76176c4d1aba?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1371&q=80",
-    price: 9.99,
-    description: "Freshly smashed avocado on artisan sourdough toast, topped with cherry tomatoes, feta cheese, and microgreens. Drizzled with extra virgin olive oil and lemon juice.",
-    rating: 4.8,
-    available: true,
-    preparationTime: "10-15 min",
-    foodTags: [
-      foodTags[0], // Vegetarian
-      foodTags[3], // Organic
-      { id: "9", name: "Breakfast", color: "#FFC107" }
-    ],
-    hasCoupon: true,
-    couponCode: "HEALTHY15",
-    couponDiscount: 15
-  }
-];
+// const sampleFoods = [
+//   {
+//     id: "1",
+//     title: "Margherita Pizza",
+//     image: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1469&q=80",
+//     price: 12.99,
+//     description: "Classic Italian pizza with tomato sauce, mozzarella, and fresh basil. Made with our homemade dough and baked in a wood-fired oven.",
+//     rating: 4.6,
+//     available: true,
+//     preparationTime: "15-20 min",
+//     foodTags: [
+//       foodTags[0], // Vegetarian
+//       { id: "7", name: "Italian", color: "#FF9800" }
+//     ],
+//     hasCoupon: true,
+//     couponCode: "PIZZA10",
+//     couponDiscount: 10
+//   },
+//   {
+//     id: "2",
+//     title: "Chicken Alfredo Pasta",
+//     image: "https://images.unsplash.com/photo-1645112411341-6c4fd023882a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+//     price: 15.99,
+//     description: "Creamy Alfredo sauce with grilled chicken breast served over fettuccine pasta. Garnished with parmesan cheese and parsley.",
+//     rating: 4.4,
+//     available: true,
+//     preparationTime: "20-25 min",
+//     foodTags: [
+//       { id: "7", name: "Italian", color: "#FF9800" },
+//       { id: "8", name: "Pasta", color: "#795548" }
+//     ],
+//     hasCoupon: false,
+//     couponCode: "",
+//     couponDiscount: 0
+//   },
+//   {
+//     id: "3",
+//     title: "Avocado Toast",
+//     image: "https://images.unsplash.com/photo-1603046891744-76176c4d1aba?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1371&q=80",
+//     price: 9.99,
+//     description: "Freshly smashed avocado on artisan sourdough toast, topped with cherry tomatoes, feta cheese, and microgreens. Drizzled with extra virgin olive oil and lemon juice.",
+//     rating: 4.8,
+//     available: true,
+//     preparationTime: "10-15 min",
+//     foodTags: [
+//       foodTags[0], // Vegetarian
+//       foodTags[3], // Organic
+//       { id: "9", name: "Breakfast", color: "#FFC107" }
+//     ],
+//     hasCoupon: true,
+//     couponCode: "HEALTHY15",
+//     couponDiscount: 15
+//   }
+// ];
 
-const Home = () => {
+const HomePage = () => {
   const [location, setLocation] = useState("New York, NY");
-  const [restaurants, setRestaurants] = useState([]);
-  const [popularFoods, setPopularFoods] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+
+  // will fetch all this from frontend
+  // const [restaurants, setRestaurants] = useState([]);
+  // const [popularFoods, setPopularFoods] = useState([]);
+  // const [isLoading, setIsLoading] = useState(true);
+
   const [activeCategory, setActiveCategory] = useState("all");
 
-  useEffect(() => {
-    // Simulate API loading
-    const timer = setTimeout(() => {
-      setRestaurants(sampleRestaurants);
-      setPopularFoods(sampleFoods);
-      setIsLoading(false);
-    }, 1000);
-    
-    return () => clearTimeout(timer);
-  }, []);
 
+  // Use stores to get data
+  const {
+    // restaurants,
+    getAllRestaurants,
+    // featuredRestaurants,
+    getFeaturedRestaurants,
+    // nearbyRestaurants,
+    // getNearbyRestaurants,    // -- already added
+    // fetchRestaurants,
+    // fetchFeaturedRestaurants,
+    // fetchNearbyRestaurants,
+    getNearbyRestaurants,
+    restaurants,
+    featuredRestaurants = [],
+    nearbyRestaurants = [],
+    isLoading: restaurantsLoading,
+    error: restaurantsError
+  } = useRestaurantStore();
+
+  const {
+    getPopularFoods,
+    getFeaturedFoods,
+    popularFoods = [],
+    featuredFoods = [],
+    // fetchPopularFoods,
+    // fetchFeaturedFoods,
+    isLoading: foodsLoading,
+    error: foodsError
+  } = useFoodStore();
+
+
+  // useEffect(() => {
+  //   // Simulate API loading
+  //   const timer = setTimeout(() => {
+  //     setRestaurants(sampleRestaurants);
+  //     setPopularFoods(sampleFoods);
+  //     setIsLoading(false);
+  //   }, 1000);
+
+  //   return () => clearTimeout(timer);
+  // }, []);
+
+
+  // Fetch data on component mount
+  // useEffect(() => {
+  //   // fetchRestaurants();     // getAllRestaurants()
+  //   getAllRestaurants();
+  //   // fetchFeaturedRestaurants();
+  //   getFeaturedRestaurants();
+  //   // fetchNearbyRestaurants(location);
+  //   getNearbyRestaurants(location);
+  //   // fetchPopularFoods();
+  //   getPopularFoods();
+  //   // fetchFeaturedFoods();
+  //   getFeaturedFoods();
+  // }, [location]);
+
+
+  // Update the data fetching in HomePage
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       await getAllRestaurants();
+  //       // await fetchFeaturedRestaurants();
+  //       await getFeaturedRestaurants();
+  //       // await fetchNearbyRestaurants(location);
+  //       await getNearbyRestaurants(location);
+  //       // await fetchPopularFoods();
+  //       await getPopularFoods();
+  //       // await fetchFeaturedFoods();
+  //     } catch (error) {
+  //       console.error("Error fetching data:", error);
+  //       // You might want to add error handling here
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, [
+  //   // location,
+  //   getAllRestaurants,
+  //   // fetchFeaturedRestaurants, 
+  //   getFeaturedRestaurants,
+  //   // fetchNearbyRestaurants, 
+  //   getNearbyRestaurants,
+  //   // fetchPopularFoods, 
+  //   getPopularFoods,
+  //   // fetchFeaturedFoods,
+  //   getFeaturedFoods,
+  // ]);
+
+  // Fetch data on mount and location change
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        await Promise.all([
+          getAllRestaurants(),
+          getFeaturedRestaurants(),
+          getNearbyRestaurants(location),
+          getPopularFoods(),
+          getFeaturedFoods()
+        ]);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, [location, getAllRestaurants, getFeaturedRestaurants, getNearbyRestaurants, getPopularFoods, getFeaturedFoods]); // Only include location since store methods are stable
+
+  // Handle location change
+  const handleLocationChange = useCallback((newLocation) => {
+    setLocation(newLocation);
+    // fetchNearbyRestaurants(newLocation);
+    // getNearbyRestaurants(newLocation);
+  }, []);     // No dependencies needed
+
+  // Filter restaurants based on active category
+  // const filteredRestaurants = () => {
+  //   switch (activeCategory) {
+  //     case "favorites":
+  //       return restaurants.filter(r => r.isFavorite);
+  //     case "nearby":
+  //       // return nearbyRestaurants;
+  //       return getNearbyRestaurants;
+  //     case "offers":
+  //       return restaurants.filter(r => r.promotion);
+  //     default:
+  //       return restaurants;
+  //   }
+  // };
+
+  // Replace filteredRestaurants function with:
+  const filteredRestaurants = useMemo(() => {
+    switch (activeCategory) {
+      case "favorites":
+        return restaurants.filter(r => r.isFavorite);
+      case "nearby":
+        return nearbyRestaurants;
+      case "offers":
+        return restaurants.filter(r => r.promotion);
+      default:
+        return restaurants;
+    }
+  }, [activeCategory, nearbyRestaurants, restaurants]);
+
+  // Animation configurations
   const staggerContainer = {
     hidden: { opacity: 0 },
     show: {
@@ -171,10 +316,39 @@ const Home = () => {
     { id: "offers", label: "Special Offers", icon: <Tag size={16} /> },
   ];
 
+  // Loading and error states
+  if (restaurantsLoading || foodsLoading) {
+    return (
+      <div className="flex justify-center items-center h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-coral"></div>
+      </div>
+    );
+  }
+
+  if (restaurantsError || foodsError) {
+    return (
+      <div className="text-center py-12">
+        <h3 className="text-lg font-medium text-red-500">
+          Error loading data
+        </h3>
+        <p className="mt-2 text-gray-600">
+          {restaurantsError?.message || foodsError?.message || 'Please try again later'}
+        </p>
+        <Button
+          className="mt-4 bg-coral hover:bg-coral/90 text-white"
+          onClick={() => window.location.reload()}
+        >
+          Retry
+        </Button>
+      </div>
+    );
+  }
+
+  // Main content
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Hero Section */}
-      <motion.div 
+      <motion.div
         className="mb-8 hero-gradient rounded-2xl p-6 md:p-10 relative overflow-hidden shadow-lg"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -186,7 +360,7 @@ const Home = () => {
           </svg>
         </div>
         <div className="relative z-10 max-w-3xl">
-          <motion.h1 
+          <motion.h1
             className="text-3xl md:text-5xl font-bold text-foreground mb-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -194,7 +368,7 @@ const Home = () => {
           >
             Discover and Order <span className="text-coral">Delicious Food</span>
           </motion.h1>
-          <motion.p 
+          <motion.p
             className="text-foreground/70 mb-8 text-lg"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -202,8 +376,8 @@ const Home = () => {
           >
             From local favorites to culinary adventures, get it delivered with just a few taps.
           </motion.p>
-          
-          <motion.div 
+
+          <motion.div
             className="flex flex-col sm:flex-row gap-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -211,33 +385,35 @@ const Home = () => {
           >
             <div className="relative flex-grow">
               <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
-              <Input 
-                type="text" 
+              <Input
+                type="text"
                 placeholder="Your delivery address"
                 value={location}
-                onChange={(e) => setLocation(e.target.value)}
+                // onChange={(e) => setLocation(e.target.value)}
+                onChange={(e) => handleLocationChange(e.target.value)}
                 className="pl-10 bg-[#f4fdfb]/50 dark:bg-[#f4fdfb]/20 border-none shadow-sm rounded-full h-12"
               />
             </div>
-            
+
+            {/* ... search input and button ... */}
             <div className="relative flex-grow">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
-              <Input 
-                type="text" 
+              <Input
+                type="text"
                 placeholder="Search for food or restaurants"
                 className="pl-10 bg-[#f4fdfb]/50 dark:bg-[#f4fdfb]/20 border-none shadow-sm rounded-full h-12"
               />
             </div>
-            
+
             <Button className="bg-coral hover:bg-coral/90 text-white rounded-full px-6 h-12">
               Search
             </Button>
           </motion.div>
         </div>
       </motion.div>
-      
+
       {/* Category Buttons */}
-      <motion.div 
+      <motion.div
         className="mb-10"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -248,11 +424,10 @@ const Home = () => {
             <Button
               key={category.id}
               variant={activeCategory === category.id ? "default" : "outline"}
-              className={`rounded-full flex items-center gap-2 h-11 px-5 ${
-                activeCategory === category.id 
-                  ? "bg-coral hover:bg-coral/90 text-white" 
-                  : "border hover:bg-accent/10"
-              }`}
+              className={`rounded-full flex items-center gap-2 h-11 px-5 ${activeCategory === category.id
+                ? "bg-coral hover:bg-coral/90 text-white"
+                : "border hover:bg-accent/10"
+                }`}
               onClick={() => setActiveCategory(category.id)}
             >
               {category.icon}
@@ -262,8 +437,8 @@ const Home = () => {
         </div>
       </motion.div>
 
-      {/* Featured Carousel */}
-      <motion.div 
+      {/* Featured Carousel  ||  Featured Offers Section*/}
+      <motion.div
         className="mb-12"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -275,149 +450,225 @@ const Home = () => {
             View all <ArrowRight size={16} />
           </Button>
         </div>
-        
+
         <div className="overflow-x-auto pb-4 no-scrollbar">
           <div className="flex gap-4" style={{ minWidth: "max-content" }}>
-            {isLoading ? (
-              Array(3).fill(0).map((_, i) => (
-                <Card key={i} className="w-72 h-36 overflow-hidden shimmer">
-                  <div className="h-full"></div>
-                </Card>
-              ))
+
+            {/* {isLoading ? (
+              Array(3).fill(0).map((_, i) => ( */}
+
+            {featuredFoods.map((offer) => (
+              // <Card key={i} className="w-72 h-36 overflow-hidden shimmer">
+              <Card key={offer.id} className="w-72 h-36 overflow-hidden border-0 shadow-md">
+
+                {/* <div className="h-full"></div> */}
+                <div className="h-full relative bg-gradient-to-r from-coral to-coral/80 p-5 text-white">
+
+                  {/* </Card> */}
+                  {/* ))
             ) : (
-              <>
-                <Card className="w-72 h-36 overflow-hidden border-0 shadow-md">
-                  <div className="h-full relative bg-gradient-to-r from-coral to-coral/80 p-5 text-white">
-                    <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-white/20 rounded-full"></div>
-                    <div className="absolute right-4 -bottom-5 w-16 h-16 bg-white/30 rounded-full"></div>
-                    <div className="relative z-10">
-                      <Badge className="bg-white text-coral mb-2">New Users</Badge>
-                      <h3 className="text-xl font-bold mb-1">50% OFF First Order</h3>
-                      <p className="text-sm opacity-90">Use code: WELCOME50</p>
-                    </div>
+            <> */}
+                  {/* <Card className="w-72 h-36 overflow-hidden border-0 shadow-md">
+                <div className="h-full relative bg-gradient-to-r from-coral to-coral/80 p-5 text-white">
+                  <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-white/20 rounded-full"></div>
+                  <div className="absolute right-4 -bottom-5 w-16 h-16 bg-white/30 rounded-full"></div> */}
+
+                  <div className="relative z-10">
+                    {/* <Badge className="bg-white text-coral mb-2">New Users</Badge> */}
+                    <Badge className="bg-white text-coral mb-2">{offer.tag}</Badge>
+                    {/* <h3 className="text-xl font-bold mb-1">50% OFF First Order</h3> */}
+                    <h3 className="text-xl font-bold mb-1">{offer.title}</h3>
+                    {/* <p className="text-sm opacity-90">Use code: WELCOME50</p> */}
+                    <p className="text-sm opacity-90">Use code: {offer.code}</p>
                   </div>
-                </Card>
-                <Card className="w-72 h-36 overflow-hidden border-0 shadow-md">
-                  <div className="h-full relative bg-gradient-to-r from-mustard to-mustard/80 p-5 text-navy">
-                    <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-navy/10 rounded-full"></div>
-                    <div className="absolute right-4 -bottom-5 w-16 h-16 bg-navy/20 rounded-full"></div>
-                    <div className="relative z-10">
-                      <Badge className="bg-navy text-white mb-2">Free Delivery</Badge>
-                      <h3 className="text-xl font-bold mb-1">Orders Over $25</h3>
-                      <p className="text-sm opacity-90">Valid this weekend</p>
-                    </div>
+                </div>
+              </Card>
+            ))}
+
+            {/* <Card className="w-72 h-36 overflow-hidden border-0 shadow-md">
+                <div className="h-full relative bg-gradient-to-r from-mustard to-mustard/80 p-5 text-navy">
+                  <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-navy/10 rounded-full"></div>
+                  <div className="absolute right-4 -bottom-5 w-16 h-16 bg-navy/20 rounded-full"></div>
+                  <div className="relative z-10">
+                    <Badge className="bg-navy text-white mb-2">Free Delivery</Badge>
+                    <h3 className="text-xl font-bold mb-1">Orders Over $25</h3>
+                    <p className="text-sm opacity-90">Valid this weekend</p>
                   </div>
-                </Card>
-                <Card className="w-72 h-36 overflow-hidden border-0 shadow-md">
-                  <div className="h-full relative bg-gradient-to-r from-navy to-navy-light p-5 text-white">
-                    <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-white/10 rounded-full"></div>
-                    <div className="absolute right-4 -bottom-5 w-16 h-16 bg-white/20 rounded-full"></div>
-                    <div className="relative z-10">
-                      <Badge className="bg-mint text-navy mb-2">Limited Time</Badge>
-                      <h3 className="text-xl font-bold mb-1">Buy 1 Get 1 Free</h3>
-                      <p className="text-sm opacity-90">On selected items</p>
-                    </div>
+                </div>
+              </Card>
+              <Card className="w-72 h-36 overflow-hidden border-0 shadow-md">
+                <div className="h-full relative bg-gradient-to-r from-navy to-navy-light p-5 text-white">
+                  <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-white/10 rounded-full"></div>
+                  <div className="absolute right-4 -bottom-5 w-16 h-16 bg-white/20 rounded-full"></div>
+                  <div className="relative z-10">
+                    <Badge className="bg-mint text-navy mb-2">Limited Time</Badge>
+                    <h3 className="text-xl font-bold mb-1">Buy 1 Get 1 Free</h3>
+                    <p className="text-sm opacity-90">On selected items</p>
                   </div>
-                </Card>
-              </>
-            )}
+                </div>
+              </Card>
+            </> */}
+            {/* )} */}
+
           </div>
         </div>
       </motion.div>
 
-      {/* Popular Restaurants Section */}
-      <motion.section 
-        className="mb-12"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.7, duration: 0.5 }}
-      >
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-semibold text-foreground">Popular Restaurants</h2>
-          <Button variant="ghost" className="flex items-center gap-1 text-coral">
-            View all <ArrowRight size={16} />
-          </Button>
-        </div>
-        
-        {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="rounded-xl overflow-hidden">
-                <div className="h-40 shimmer"></div>
-                <div className="p-4 space-y-3">
-                  <div className="h-6 w-2/3 shimmer rounded"></div>
-                  <div className="h-4 w-4/5 shimmer rounded"></div>
-                  <div className="h-4 w-3/4 shimmer rounded"></div>
-                  <div className="flex gap-2">
-                    <div className="h-6 w-16 shimmer rounded-full"></div>
-                    <div className="h-6 w-16 shimmer rounded-full"></div>
-                  </div>
-                </div>
-              </div>
-            ))}
+
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
+        {/* Popular Restaurants Section */}
+        <motion.section
+          className="mb-12"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7, duration: 0.5 }}
+        >
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-semibold text-foreground">Popular Restaurants</h2>
+            <Button variant="ghost" className="flex items-center gap-1 text-coral">
+              View all <ArrowRight size={16} />
+            </Button>
           </div>
-        ) : (
-          <motion.div 
+
+          {restaurantsLoading ? (
+            // {restaurants?.length > 0 && !restaurantsLoading ? (
+
+            <div className="flex justify-center py-8">
+              <Spinner /> {/* Your loading component */}
+            </div>
+
+          ) : restaurantsError ? (
+            // <ErrorMessage error={restaurantsError} />
+            <ErrorDisplay message={restaurantsError} />
+          ) : restaurants?.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+              {/* {[1, 2, 3].map(i => ( */}
+              {restaurants.map((restaurant) => (
+
+                // <div key={i} className="rounded-xl overflow-hidden">
+                //   <div className="h-40 shimmer"></div>
+                //   <div className="p-4 space-y-3">
+                //     <div className="h-6 w-2/3 shimmer rounded"></div>
+                //     <div className="h-4 w-4/5 shimmer rounded"></div>
+                //     <div className="h-4 w-3/4 shimmer rounded"></div>
+                //     <div className="flex gap-2">
+                //       <div className="h-6 w-16 shimmer rounded-full"></div>
+                //       <div className="h-6 w-16 shimmer rounded-full"></div>
+                //     </div>
+                //   </div>
+                // </div>
+                //  <div key={restaurant._id} className="debug-border">
+                <RestaurantCard key={restaurant._id} restaurant={restaurant} />
+                // </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              <p>No restaurants available</p>
+            </div>
+
+          )}
+        </motion.section>
+
+        {/* ) : (
+          <motion.div
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
             variants={staggerContainer}
             initial="hidden"
             animate="show"
-          >
-            {restaurants.map((restaurant) => (
-              <motion.div key={restaurant.id} variants={itemAnimation}>
-                <RestaurantCard restaurant={restaurant} />
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
-      </motion.section>
-      
-      {/* Popular Foods Section */}
-      <motion.section
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.8, duration: 0.5 }}
-      >
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-semibold text-foreground">Most Popular Items</h2>
-          <Button variant="ghost" className="flex items-center gap-1 text-coral">
-            View all <ArrowRight size={16} />
-          </Button>
-        </div>
-        
-        {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="rounded-xl overflow-hidden">
-                <div className="h-40 shimmer"></div>
-                <div className="p-4 space-y-3">
-                  <div className="h-6 w-2/3 shimmer rounded"></div>
-                  <div className="h-4 w-1/2 shimmer rounded"></div>
-                  <div className="flex justify-between">
-                    <div className="h-6 w-16 shimmer rounded"></div>
-                    <div className="h-8 w-8 shimmer rounded-full"></div>
-                  </div>
-                </div>
-              </div>
-            ))}
+          > */}
+        {/* {restaurants.map((restaurant) => ( */}
+        {/* {filteredRestaurants().map((restaurant) => ( */}
+        {/* <motion.div key={restaurant._id} variants={itemAnimation}> */}
+        {/* <RestaurantCard restaurant={restaurant} />    * check restaurant or restaurants */}
+        {/* </motion.div> */}
+        {/* ))} */}
+        {/* </motion.div> */}
+        {/* )} */}
+        {/* </motion.section> */}
+
+
+
+        {/* Popular Foods Section */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8, duration: 0.5 }}
+        >
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-semibold text-foreground">Most Popular Items</h2>
+            <Button variant="ghost" className="flex items-center gap-1 text-coral">
+              View all <ArrowRight size={16} />
+            </Button>
           </div>
-        ) : (
-          <motion.div 
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-            variants={staggerContainer}
-            initial="hidden"
-            animate="show"
-          >
-            {popularFoods.map((food) => (
-              <motion.div key={food.id} variants={itemAnimation}>
-                <FoodCard food={food} />
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
-      </motion.section>
+
+
+          {/* {isLoading ? ( */}
+          {/* {foodsLoading ? ( */}
+          {foodsLoading ? (
+            <div className="flex justify-center py-8">
+              <Spinner /> {/* Your loading component */}
+            </div>
+          ) : foodsError ? (
+            <ErrorMessage error={foodsError} />
+          ) : popularFoods?.length > 0 ? (
+
+            // {
+            // popularFoods.length > 0 && !foodsLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 debug-order">
+              {/* {[1, 2, 3].map(i => ( */}
+              {popularFoods.map((food) => (
+
+                // <div key={i} className="rounded-xl overflow-hidden">
+                //   <div className="h-40 shimmer"></div>
+                //   <div className="p-4 space-y-3">
+                //     <div className="h-6 w-2/3 shimmer rounded"></div>
+                //     <div className="h-4 w-1/2 shimmer rounded"></div>
+                //     <div className="flex justify-between">
+                //       <div className="h-6 w-16 shimmer rounded"></div>
+                //       <div className="h-8 w-8 shimmer rounded-full"></div>
+                //     </div>
+                //   </div>
+                // </div>
+
+                // <div key={food._id} className="debug-border">
+                <FoodCard key={food._id} food={food} />
+                // </div>
+
+              ))}
+            </div>
+          ) : (
+            // (getPopularFoods && getPopularFoods.length > 0) ? (
+            //   <motion.div
+            //     className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            //     variants={staggerContainer}
+            //     initial="hidden"
+            //     animate="show"
+            //   >
+            //     {/* {popularFoods.map((food) => ( */}
+            //     {getPopularFoods.map((food) => (
+            //       // <motion.div key={food.id} variants={itemAnimation}>
+            //       <motion.div key={food._id} variants={itemAnimation}>
+            //         <FoodCard food={food} />
+            //       </motion.div>
+            //     ))}
+            //   </motion.div>
+            // ) : (
+            <div className="text-center py-8 text-gray-500">
+              <p>No popular food items available</p>
+            </div>
+
+            // )
+
+          )
+          }
+        </motion.section>
+      </ErrorBoundary>
     </div>
   );
 };
 
-export default Home;
+
+
+export default HomePage;
